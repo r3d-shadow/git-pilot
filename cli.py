@@ -10,6 +10,7 @@ def main():
     parser.add_argument('--branch', default='main', help='Target branch')
     parser.add_argument('--template', required=True, help='Path to local workflow template')
     parser.add_argument('--path', default='.github/workflows/ci.yml', help='Target file path in repo')
+    parser.add_argument('--message', default='ci-sync: update CI workflow', help='Commit message for workflow update')
 
     args = parser.parse_args()
     repo_list = [r.strip() for r in args.repos.split(',') if r.strip()]
@@ -21,7 +22,8 @@ def main():
             repos=repo_list,
             branch=args.branch,
             template_content=template_content,
-            target_path=args.path
+            target_path=args.path,
+            commit_message=args.message
         )
 
 if __name__ == '__main__':

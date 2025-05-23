@@ -1,7 +1,7 @@
 from github import Github
 from core import comparator
 
-def sync(token, repos, branch, template_content, target_path):
+def sync(token, repos, branch, template_content, target_path, commit_message):
     github = Github(token)
 
     for repo_fullname in repos:
@@ -19,7 +19,6 @@ def sync(token, repos, branch, template_content, target_path):
             print("  - Skipped: Up to date")
             continue
 
-        commit_message = "ci-sync: update CI workflow"
         if sha:
             repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
         else:
