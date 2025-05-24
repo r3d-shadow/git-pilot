@@ -7,8 +7,9 @@ def sync(token, repos, branch, template_content, target_path, commit_message):
     for repo_fullname in repos:
         repo = github.get_repo(repo_fullname)
         print(f"Processing {repo.full_name}...")
+
         try:
-            contents = repo.get_contents(target_path)
+            contents = repo.get_contents(target_path, ref=branch)
             existing = contents.decoded_content.decode()
             sha = contents.sha
         except Exception:
@@ -19,8 +20,11 @@ def sync(token, repos, branch, template_content, target_path, commit_message):
             print("  - Skipped: Up to date")
             continue
 
-        if sha:
-            repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
-        else:
-            repo.create_file(target_path, commit_message, template_content, branch=branch)
-        print("  - Updated")
+        try:
+            if sha:
+                repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
+            else:
+                repo.create_file(target_path, commit_message, template_content, branch=branch)
+            print("  - Updated")
+        except Exception as e:
+            print(f"  - Error: {e}")
