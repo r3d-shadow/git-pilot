@@ -1,6 +1,6 @@
+from core.diff import generate_diff
 from github import Github
 from core import comparator
-import difflib
 
 def sync(token, repos, branch, template_content, target_path, commit_message, dry_run=False):
     github = Github(token)
@@ -22,13 +22,7 @@ def sync(token, repos, branch, template_content, target_path, commit_message, dr
 
         if dry_run:
             print(f"  - Dry run: would update {target_path} in {repo.full_name}")
-            diff = difflib.unified_diff(
-                existing.splitlines(keepends=True) if existing else [],
-                template_content.splitlines(keepends=True),
-                fromfile='existing',
-                tofile='new',
-            )
-            print(''.join(diff))
+            print(generate_diff(existing, template_content, target_path))
         else:
             # Proceed with update/create commit
             if sha:

@@ -16,5 +16,5 @@ repos:
   - name: r3d-shadow/ci-sync-test-2
     path: ".github/workflows/override.yml"
     vars:
-      job_id: sast_scan12
+      job_id: sast_scan123
       env: stage
