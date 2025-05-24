@@ -3,6 +3,7 @@ import yaml
 from providers import github
 from core import loader, comparator
 from collections import ChainMap
+from core.state import StateManager
 
 def main():
     parser = argparse.ArgumentParser(description="Sync CI workflows across GitHub repos")
@@ -11,11 +12,14 @@ def main():
     parser.add_argument('--template', required=True, help='Path to local workflow template (Jinja2 supported)')
     parser.add_argument('--values', required=True, help='Path to values.yaml with repo-specific config')
     parser.add_argument('--dry-run', action='store_true', help='Show changes without committing')
+    parser.add_argument('--state-file', default=".ci-sync.state.json", help="Path to state file")
 
     args = parser.parse_args()
 
     with open(args.values) as f:
         config = yaml.safe_load(f)
+
+    state_manager = StateManager(path=args.state_file)
 
     defaults = config.get("defaults", {})
 
@@ -25,7 +29,6 @@ def main():
         message = repo.get("message", defaults.get("message", "ci-sync: update CI workflow"))
         path = repo.get("path", defaults.get("path", ".github/workflows/ci.yml"))
 
-        # 🧠 Merge default + repo vars
         repo_vars = repo.get("vars", {})
         default_vars = defaults.get("vars", {})
         merged_vars = dict(ChainMap(repo_vars, default_vars))
@@ -40,7 +43,8 @@ def main():
                 template_content=template_content,
                 target_path=path,
                 commit_message=message,
-                dry_run=args.dry_run
+                dry_run=args.dry_run,
+                state_manager=state_manager
             )
 
 if __name__ == '__main__':

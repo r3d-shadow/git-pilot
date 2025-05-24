@@ -11,10 +11,10 @@ repos:
     message: "ci-sync: update CI workflow : Override"
     vars:
       job_id: container_scan
-      env: dev
+      env: test
 
   - name: r3d-shadow/ci-sync-test-2
-    path: ".github/workflows/override.yml"
+    path: ".github/workflows/override.yml1"
     vars:
-      job_id: sast_scan123
+      job_id: sast_scan123456
       env: stage

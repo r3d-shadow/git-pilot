@@ -1,0 +1,14 @@
+{
+  "repos": {
+    "r3d-shadow/ci-sync-test-2": {
+      "file_path": ".github/workflows/override.yml1",
+      "sha": "566d058c2d75b5288c52982cfdcc8f9707966433",
+      "last_synced": "2025-05-24T04:51:04Z"
+    },
+    "r3d-shadow/ci-sync-test-1": {
+      "file_path": ".github/workflows/ci.yml",
+      "sha": "2090f4dffe4164cd4e2f82344583258edec90972",
+      "last_synced": "2025-05-24T04:51:01Z"
+    }
+  }
+}
