@@ -3,7 +3,6 @@ from core import comparator
 
 def sync(token, repos, branch, template_content, target_path, commit_message):
     github = Github(token)
-
     for repo_fullname in repos:
         repo = github.get_repo(repo_fullname)
         print(f"Processing {repo.full_name}...")
@@ -17,14 +16,11 @@ def sync(token, repos, branch, template_content, target_path, commit_message):
             sha = None
 
         if comparator.is_same(existing, template_content):
-            print("  - Skipped: Up to date")
+            print("  - Skipped: Already up to date")
             continue
 
-        try:
-            if sha:
-                repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
-            else:
-                repo.create_file(target_path, commit_message, template_content, branch=branch)
-            print("  - Updated")
-        except Exception as e:
-            print(f"  - Error: {e}")
+        if sha:
+            repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
+        else:
+            repo.create_file(target_path, commit_message, template_content, branch=branch)
+        print("  - Synced successfully")

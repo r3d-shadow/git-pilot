@@ -1,2 +1,4 @@
-def is_same(existing_content, new_content):
-    return existing_content == new_content
+def is_same(existing, new):
+    if existing is None:
+        return False
+    return existing.strip() == new.strip()

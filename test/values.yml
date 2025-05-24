@@ -1,0 +1,20 @@
+defaults:
+  branch: main
+  message: "ci-sync: update CI workflow"
+  path: ".github/workflows/ci.yml"
+  vars:
+    ci_name: scan
+
+repos:
+  - name: r3d-shadow/ci-sync-test-1
+    branch: dev
+    message: "ci-sync: update CI workflow : Override"
+    vars:
+      job_id: container_scan
+      env: dev
+
+  - name: r3d-shadow/ci-sync-test-2
+    path: ".github/workflows/override.yml"
+    vars:
+      job_id: sast_scan
+      env: stage

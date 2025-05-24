@@ -1,3 +1,6 @@
-def load_template(template_path):
-    with open(template_path, 'r') as f:
-        return f.read()
+from jinja2 import Template
+
+def load_template(path, variables={}):
+    with open(path) as f:
+        template = Template(f.read())
+    return template.render(**variables)
