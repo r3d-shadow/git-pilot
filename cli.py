@@ -10,6 +10,7 @@ def main():
     parser.add_argument('--token', required=True, help='Access token')
     parser.add_argument('--template', required=True, help='Path to local workflow template (Jinja2 supported)')
     parser.add_argument('--values', required=True, help='Path to values.yaml with repo-specific config')
+    parser.add_argument('--dry-run', action='store_true', help='Show changes without committing')
 
     args = parser.parse_args()
 
@@ -38,7 +39,8 @@ def main():
                 branch=branch,
                 template_content=template_content,
                 target_path=path,
-                commit_message=message
+                commit_message=message,
+                dry_run=args.dry_run
             )
 
 if __name__ == '__main__':

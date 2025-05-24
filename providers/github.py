@@ -1,7 +1,8 @@
 from github import Github
 from core import comparator
+import difflib
 
-def sync(token, repos, branch, template_content, target_path, commit_message):
+def sync(token, repos, branch, template_content, target_path, commit_message, dry_run=False):
     github = Github(token)
     for repo_fullname in repos:
         repo = github.get_repo(repo_fullname)
@@ -19,8 +20,19 @@ def sync(token, repos, branch, template_content, target_path, commit_message):
             print("  - Skipped: Already up to date")
             continue
 
-        if sha:
-            repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
+        if dry_run:
+            print(f"  - Dry run: would update {target_path} in {repo.full_name}")
+            diff = difflib.unified_diff(
+                existing.splitlines(keepends=True) if existing else [],
+                template_content.splitlines(keepends=True),
+                fromfile='existing',
+                tofile='new',
+            )
+            print(''.join(diff))
         else:
-            repo.create_file(target_path, commit_message, template_content, branch=branch)
-        print("  - Synced successfully")
+            # Proceed with update/create commit
+            if sha:
+                repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
+            else:
+                repo.create_file(target_path, commit_message, template_content, branch=branch)
+            print("  - Synced successfully")
