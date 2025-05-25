@@ -1,3 +1,3 @@
-[% macro upper(s) %]
+[%- macro upper(s) -%]
 [[ s.upper().strip() if s ]]
-[% endmacro %]
+[%- endmacro -%]
