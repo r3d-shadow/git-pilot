@@ -51,7 +51,7 @@ def main():
             template_path = os.path.join(args.template_dir, tmpl)
             content = loader.load_template(template_path, merged_vars)
 
-            filename = os.path.splitext(tmpl)[0] + '.yml'
+            filename = os.path.splitext(tmpl)[0]
             target_path = os.path.join(base_path, filename)
             template_key = tmpl
 
