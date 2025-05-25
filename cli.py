@@ -1,4 +1,3 @@
-# cli.py
 import argparse
 import yaml
 import re
@@ -7,21 +6,20 @@ from collections import ChainMap
 from providers import github
 from core import loader
 from core.state import StateManager
+from core.init import write_example_structure
 
-def main():
-    parser = argparse.ArgumentParser(description="Sync multiple templated workflows across GitHub repos")
-    parser.add_argument('--provider', choices=['github'], default='github', help='CI provider')
-    parser.add_argument('--token', required=True, help='Access token')
-    parser.add_argument('--template-dir', required=True, help='Directory containing Jinja2 workflow templates')
-    parser.add_argument('--values', required=True, help='Path to values.yaml with repo-specific config')
-    parser.add_argument('--dry-run', action='store_true', help='Show changes without committing')
-    parser.add_argument('--state-file', default='.ci-sync.json', help='Path to local state file')
+def init_cmd(args):
+    write_example_structure(args.template_dir)
+    print(f"Template structure initialized in {args.template_dir}")
 
-    args = parser.parse_args()
+def sync_cmd(args):
     config = yaml.safe_load(open(args.values))
     defaults = config.get('defaults', {})
 
-    all_templates = [f for f in os.listdir(args.template_dir) if os.path.isfile(os.path.join(args.template_dir, f))]
+    all_templates = [
+        f for f in os.listdir(args.template_dir)
+        if os.path.isfile(os.path.join(args.template_dir, f))
+    ]
     state_manager = StateManager(path=args.state_file)
 
     for repo_cfg in config.get('repos', []):
@@ -85,6 +83,28 @@ def main():
 
     if not args.dry_run:
         state_manager.save()
+
+def main():
+    parser = argparse.ArgumentParser(description="ci-sync: sync reusable CI templates across GitHub repos")
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    # init command
+    init_parser = subparsers.add_parser('init', help='Initialize Jinja2 template scaffold like Helm charts')
+    init_parser.add_argument('--template-dir', required=True, help='Directory to bootstrap template structure')
+    init_parser.set_defaults(func=init_cmd)
+
+    # sync command
+    sync_parser = subparsers.add_parser('sync', help='Sync rendered workflows to GitHub repositories')
+    sync_parser.add_argument('--provider', choices=['github'], default='github', help='CI provider')
+    sync_parser.add_argument('--token', required=True, help='Access token')
+    sync_parser.add_argument('--template-dir', required=True, help='Directory containing Jinja2 workflow templates')
+    sync_parser.add_argument('--values', required=True, help='Path to values.yaml with repo-specific config')
+    sync_parser.add_argument('--dry-run', action='store_true', help='Show changes without committing')
+    sync_parser.add_argument('--state-file', default='.ci-sync.json', help='Path to local state file')
+    sync_parser.set_defaults(func=sync_cmd)
+
+    args = parser.parse_args()
+    args.func(args)
 
 if __name__ == '__main__':
     main()
