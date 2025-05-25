@@ -3,7 +3,7 @@ from src.cli.commands import InitCommand, SyncCommand
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="ci-sync: sync reusable CI templates across repos"
+        description="git-piplot: sync reusable files across repos"
     )
     subparsers = parser.add_subparsers(dest='command_name', required=True)
 
@@ -22,7 +22,7 @@ def build_parser():
                              help='Directory containing Jinja2 workflow templates')
     sync_parser.add_argument('--values', required=True,
                              help='Path to values YAML with repo config')
-    sync_parser.add_argument('--state-file', default='.ci-sync.json',
+    sync_parser.add_argument('--state-file', default='.git-pilot-state.json',
                              help='Path to local state file')
     sync_parser.set_defaults(command=SyncCommand())
 

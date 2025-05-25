@@ -3,9 +3,9 @@
     "r3d-shadow/ci-sync-test-2": {
       "files": {
         "override-example.yml.j2": {
-          "file_path": ".github/workflows/ci-sync/override-example.yml",
-          "sha": "113a77b0828d54045a2e595343d7f740efac2303",
-          "last_synced": "2025-05-25T14:16:17Z"
+          "file_path": ".github/workflows/git-pilot/override-example.yml",
+          "sha": "c51cae5fb16c97d44dca7a7dea82b48002818880",
+          "last_synced": "2025-05-25T14:58:09Z"
         }
       }
     },
@@ -18,8 +18,8 @@
         },
         "override-example.yml.j2": {
           "file_path": ".github/workflows/override-example.yml",
-          "sha": "new",
-          "last_synced": "2025-05-25T14:14:05Z"
+          "sha": "db76c3da35d6aadfc649b88f200f2b7e4ca55ca7",
+          "last_synced": "2025-05-25T14:58:07Z"
         }
       }
     }

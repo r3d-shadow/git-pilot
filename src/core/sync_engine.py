@@ -2,6 +2,7 @@ import os
 import re
 from collections import ChainMap
 from src.core.interfaces import ProviderInterface, StateInterface, TemplateInterface, DiffViewerInterface
+from src.utils.logger import Logger
 
 
 class SyncEngine:
@@ -32,7 +33,7 @@ class SyncEngine:
             selected = [t for t in templates if any(re.fullmatch(p, t) for p in patterns)]
 
             if not selected:
-                print(f"No templates matched for {repo_cfg.name}")
+                Logger.get_logger().warning(f"No templates matched for {repo_cfg.name}")
                 continue
 
             branch = getattr(repo_cfg, 'branch', None)
@@ -41,6 +42,7 @@ class SyncEngine:
 
             # Validate required fields
             if not branch or not message or not path_root:
+                Logger.get_logger().error(f"Missing required fields in config for repo '{repo_cfg.name}'")
                 raise ValueError(f"Missing required fields in config for repo '{repo_cfg.name}'")
 
             synced_keys = []
@@ -85,12 +87,12 @@ class SyncEngine:
 
         # Exit early if no changes
         if not all_diffs:
-            print("Nothing to do.")
+            Logger.get_logger().info("Nothing to do.")
             return
 
         # Interactive diff approval
         if not self.diff_viewer.show(all_diffs):
-            print("Aborted.")
+            Logger.get_logger().info("Aborted.")
             return
 
         # Apply plan
@@ -102,4 +104,4 @@ class SyncEngine:
             )
 
         self.state_mgr.save()
-        print("Sync complete.")
+        Logger.get_logger().info("Sync complete.")

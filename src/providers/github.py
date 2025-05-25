@@ -2,6 +2,7 @@ from typing import Any, List, Tuple, Optional
 from github import Github
 from src.core.interfaces import ProviderInterface
 from src.core.comparator import is_same
+from src.utils.logger import Logger
 
 class GitHubProvider(ProviderInterface):
     def __init__(self, token: str):
@@ -24,7 +25,7 @@ class GitHubProvider(ProviderInterface):
         """
         diffs: List[Tuple[str, str, str, Any, Any]] = []
         repository = self.client.get_repo(repo)
-        print(f"Processing {repo} on branch {branch}...")
+        Logger.get_logger().debug(f"Processing {repo} on branch {branch}...")
 
         # 1. Delete old path if moved
         prev_files = (
@@ -36,20 +37,20 @@ class GitHubProvider(ProviderInterface):
             old_path = prev_files[template_key]["file_path"]
             if old_path and old_path != path:
                 if dry_run:
-                    print(f"  - Dry run: would delete old file {old_path}")
+                    Logger.get_logger().debug(f"  - Dry run: would delete old file {old_path}")
                     diffs.append((repo, "delete", old_path, None, None))
                 else:
                     try:
                         old_obj = repository.get_contents(old_path, ref=branch)
                         repository.delete_file(
                             old_path,
-                            f"ci-sync: remove old workflow file {old_path}",
+                            f"git-pilot: remove old workflow file {old_path}",
                             old_obj.sha,
                             branch=branch
                         )
-                        print(f"  - Deleted old file {old_path}")
+                        Logger.get_logger().info(f"  - Deleted old file {old_path}")
                     except Exception as e:
-                        print(f"  - Warning: could not delete {old_path}: {e}")
+                        Logger.get_logger().error(f"  - Warning: could not delete {old_path}: {e}")
 
         # 2. Fetch existing file
         try:
@@ -62,20 +63,20 @@ class GitHubProvider(ProviderInterface):
 
         # 3. If identical, skip
         if is_same(existing, content):
-            print("  - Skipped: already up to date")
+            Logger.get_logger().info(f"  - {repo}:{branch} [{path}] Skipped: already up to date")
             return diffs
 
         action = "update" if existing else "create"
         if dry_run:
-            print(f"  - Dry run: would {action} {path}")
+            Logger.get_logger().debug(f"  - Dry run: would {action} {path}")
             diffs.append((repo, action, path, existing, content))
         else:
             if sha:
                 repository.update_file(path, commit_message, content, sha, branch=branch)
-                print(f"  - Updated {path}")
+                Logger.get_logger().info(f"  - Updated {path}")
             else:
                 repository.create_file(path, commit_message, content, branch=branch)
-                print(f"  - Created {path}")
+                Logger.get_logger().info(f"  - Created {path}")
 
             # Update state
             if state_manager and template_key:
@@ -104,6 +105,6 @@ class GitHubProvider(ProviderInterface):
         try:
             contents = repository.get_contents(path, ref=branch)
             repository.delete_file(path, commit_message, contents.sha, branch=branch)
-            print(f"  - Deleted file {path}")
+            Logger.get_logger().info(f"  - Deleted file {path}")
         except Exception as e:
-            print(f"  - Warning: failed to delete {path}: {e}")
+            Logger.get_logger().error(f"  - Warning: failed to delete {path}: {e}")

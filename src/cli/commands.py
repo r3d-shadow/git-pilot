@@ -1,6 +1,7 @@
 from src.config.loader import ConfigLoader
 from src.core.farcade import SyncFacade
 from src.core.init import write_example_structure
+from src.utils.logger import Logger
 
 class Command:
     def execute(self, args):
@@ -9,7 +10,7 @@ class Command:
 class InitCommand(Command):
     def execute(self, args):
         write_example_structure(args.template_dir)
-        print(f"Template scaffold created at {args.template_dir}")
+        Logger.get_logger().info(f"Template scaffold created at {args.template_dir}")
 
 class SyncCommand(Command):
     def execute(self, args):
