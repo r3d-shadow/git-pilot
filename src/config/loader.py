@@ -1,13 +1,13 @@
 import yaml
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 @dataclass
 class RepoConfig:
     name: str
-    branch: str = 'main'
-    message: str = ''
-    path: str = '.github/workflows'
+    branch: Optional[str] = None
+    message: Optional[str] = None
+    path: Optional[str] = None
     vars: Dict = field(default_factory=dict)
     templates: List[str] = field(default_factory=list)
 
@@ -19,7 +19,24 @@ class Config:
 class ConfigLoader:
     @staticmethod
     def load(path: str) -> Config:
-        data = yaml.safe_load(open(path))
-        defaults = data.get('defaults', {})
-        repos = [RepoConfig(**r) for r in data.get('repos', [])]
+        with open(path, "r") as f:
+            data = yaml.safe_load(f)
+
+        defaults = data.get("defaults", {})
+
+        def apply_defaults(repo: Dict) -> RepoConfig:
+            # Merge defaults with repo, repo values override
+            merged = {
+                "branch": defaults.get("branch"),
+                "message": defaults.get("message"),
+                "path": defaults.get("path", ".github/workflows"),
+                "vars": defaults.get("vars", {}),
+                "templates": defaults.get("templates", []),
+                **repo,  # overrides from repo-level config
+            }
+            # Deep merge vars
+            merged["vars"] = {**defaults.get("vars", {}), **repo.get("vars", {})}
+            return RepoConfig(**merged)
+
+        repos = [apply_defaults(r) for r in data.get("repos", [])]
         return Config(defaults=defaults, repos=repos)
