@@ -9,7 +9,9 @@ jobs:
   [[ job_id ]]:
     runs-on: ubuntu-latest
     steps:
-      - name: Hello from [[ env ]]!
-        run: echo "Hello1, [[ job_id ]]!"
-        env:
-          SUPER_SECRET: ${{ secrets.SuperSecret }}
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - [% filter indent(6) %]
+          [% include 'units/hello-world.j2' %]
+        [% endfilter %]
