@@ -1,25 +1,20 @@
 {
   "repos": {
-    "r3d-shadow/ci-sync-test-2": {
+    "r3d-shadow/git-pilot-test-1": {
       "files": {
         "override-example.yml.j2": {
-          "file_path": ".github/workflows/git-pilot/override-example.yml",
-          "sha": "c51cae5fb16c97d44dca7a7dea82b48002818880",
-          "last_synced": "2025-05-25T14:58:09Z"
+          "file_path": ".github/workflows/override-example.yml",
+          "sha": "61ea78959ba303de4ee53ce0da1385c59e32d8a5",
+          "last_synced": "2025-05-25T15:02:08Z"
         }
       }
     },
-    "r3d-shadow/ci-sync-test-1": {
+    "r3d-shadow/git-pilot-test-2": {
       "files": {
-        "example.yml.j2": {
-          "file_path": ".github/workflows/example.yml",
-          "sha": "new",
-          "last_synced": "2025-05-25T14:14:02Z"
-        },
         "override-example.yml.j2": {
-          "file_path": ".github/workflows/override-example.yml",
-          "sha": "db76c3da35d6aadfc649b88f200f2b7e4ca55ca7",
-          "last_synced": "2025-05-25T14:58:07Z"
+          "file_path": ".github/workflows/git-pilot/override-example.yml",
+          "sha": "1700df4dd4e25c30ebd4c3b5d3fe2f49ad191845",
+          "last_synced": "2025-05-25T15:02:10Z"
         }
       }
     }

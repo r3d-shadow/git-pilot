@@ -8,14 +8,14 @@ defaults:
     - ".*\\.j2$"
 
 repos:
-  - name: r3d-shadow/ci-sync-test-1
+  - name: r3d-shadow/git-pilot-test-1
     vars:
       job_id: container_scan1
       env: test
 
-  - name: r3d-shadow/ci-sync-test-2
+  - name: r3d-shadow/git-pilot-test-2
     branch: main
-    message: "git-pilot: update CI workflow1 : Override"
+    message: "git-pilot: update CI workflow : Override"
     path: ".github/workflows/git-pilot/"
     vars:
       job_id: sast

@@ -60,7 +60,7 @@ jobs:
         os.path.join(root_dir, 'values.yml'): """\
 defaults:
   branch: dev
-  message: "ci-sync: update CI workflow"
+  message: "git-pilot: update CI workflow"
   path: ".github/workflows"
   vars:
     ci_name: scan
@@ -68,15 +68,15 @@ defaults:
     - ".*\\\\.j2$"
 
 repos:
-  - name: r3d-shadow/ci-sync-test-1
+  - name: r3d-shadow/git-pilot-test-1
     vars:
       job_id: container_scan1
       env: test
 
-  - name: r3d-shadow/ci-sync-test-2
+  - name: r3d-shadow/git-pilot-test-2
     branch: main
-    message: "ci-sync: update CI workflow : Override"
-    path: ".github/workflows/ci-sync/"
+    message: "git-pilot: update CI workflow : Override"
+    path: ".github/workflows/git-pilot/"
     vars:
       job_id: sast_scan123456
       env: stage
