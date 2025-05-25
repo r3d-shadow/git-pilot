@@ -1,11 +1,14 @@
 import os
 
-def write_file(path, content):
+def write_file(path: str, content: str) -> None:
+    """
+    Helper to write a file to disk, creating parent dirs as needed.
+    """
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         f.write(content)
 
-def write_example_structure(root_dir):
+def write_example_structure(root_dir: str) -> None:
     files = {
         os.path.join(root_dir, 'example.yml.j2'): """\
 name: [[ ci_name ]]

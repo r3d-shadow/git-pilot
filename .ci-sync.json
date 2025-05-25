@@ -1,25 +1,11 @@
 {
   "repos": {
-    "r3d-shadow/ci-sync-test-1": {
-      "files": {
-        "example.yml.j2": {
-          "file_path": ".github/workflows/example.yml",
-          "sha": "new",
-          "last_synced": "2025-05-25T05:57:32Z"
-        },
-        "override-example1.yml.j2": {
-          "file_path": ".github/workflows/override-example1.yml",
-          "sha": "7e606bf7cc00cd0e0a68ecc4f255ba06475f080a",
-          "last_synced": "2025-05-25T11:28:14Z"
-        }
-      }
-    },
     "r3d-shadow/ci-sync-test-2": {
       "files": {
-        "override-example1.yml.j2": {
-          "file_path": ".github/workflows/ci-sync/override-example1.yml",
-          "sha": "1d00748e94be24930c00ecd0f7ffb7c78f75de30",
-          "last_synced": "2025-05-25T11:28:17Z"
+        "override-example.yml.j2": {
+          "file_path": ".github/workflows/ci-sync/override-example.yml",
+          "sha": "new",
+          "last_synced": "2025-05-25T12:37:25Z"
         }
       }
     }
