@@ -12,6 +12,4 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - [% filter indent(6) %]
-          [% include 'units/hello-world.j2' %]
-        [% endfilter %]
+      [[ include('units/hello-world.j2') | indent(6) ]]
