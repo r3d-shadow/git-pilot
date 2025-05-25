@@ -7,6 +7,7 @@ from providers import github
 from core import loader
 from core.state import StateManager
 from core.init import write_example_structure
+from core.diff import interactive_diff_view
 
 def init_cmd(args):
     write_example_structure(args.template_dir)
@@ -21,6 +22,7 @@ def sync_cmd(args):
         if os.path.isfile(os.path.join(args.template_dir, f))
     ]
     state_manager = StateManager(path=args.state_file)
+    all_diffs = []
 
     for repo_cfg in config.get('repos', []):
         name = repo_cfg['name']
@@ -54,7 +56,7 @@ def sync_cmd(args):
             template_key = tmpl
 
             if args.provider == 'github':
-                github.sync(
+                diffs = github.sync(
                     token=args.token,
                     repos=[name],
                     branch=branch,
@@ -65,6 +67,7 @@ def sync_cmd(args):
                     state_manager=state_manager,
                     template_key=template_key
                 )
+                all_diffs.extend(diffs)
                 synced_keys.append(template_key)
 
         removed_paths = state_manager.cleanup_old_templates(name, synced_keys)
@@ -72,6 +75,7 @@ def sync_cmd(args):
         for path in removed_paths:
             if args.dry_run:
                 print(f"  - Dry run: would remove obsolete file {path}")
+                all_diffs.append((name, 'delete', path, False, None))
             else:
                 try:
                     repo = github.Github(args.token).get_repo(name)
@@ -80,6 +84,11 @@ def sync_cmd(args):
                     print(f"  - Removed obsolete file {path}")
                 except Exception as e:
                     print(f"  - Warning: Failed to delete obsolete file {path}: {e}")
+
+    if args.dry_run and all_diffs:
+        print("alldiffs")
+        print(all_diffs)
+        interactive_diff_view(all_diffs)
 
     if not args.dry_run:
         state_manager.save()

@@ -4,8 +4,8 @@
       "files": {
         "override-example.yml.j2": {
           "file_path": ".github/workflows/ci-sync/override-example.yml",
-          "sha": "new",
-          "last_synced": "2025-05-25T05:57:41Z"
+          "sha": "be3b14273c11789fa0b0393658532254a5baa8e1",
+          "last_synced": "2025-05-25T06:45:40Z"
         }
       }
     },
@@ -18,8 +18,8 @@
         },
         "override-example.yml.j2": {
           "file_path": ".github/workflows/override-example.yml",
-          "sha": "new",
-          "last_synced": "2025-05-25T05:57:35Z"
+          "sha": "97db022efd222ed3761c6b6a28f92595e7899284",
+          "last_synced": "2025-05-25T06:45:38Z"
         }
       }
     }

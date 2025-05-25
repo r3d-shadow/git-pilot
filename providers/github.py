@@ -1,10 +1,11 @@
-from core.diff import generate_diff
 from github import Github
 from core import comparator
 
 def sync(token, repos, branch, template_content, target_path, commit_message,
          dry_run=False, state_manager=None, template_key=None):
     github = Github(token)
+    dry_run_diffs = []
+
     for repo_fullname in repos:
         repo = github.get_repo(repo_fullname)
         print(f"Processing {repo.full_name}...")
@@ -12,7 +13,6 @@ def sync(token, repos, branch, template_content, target_path, commit_message,
         prev_state = state_manager.get_repo_state(repo_fullname) if state_manager else {}
         prev_files = prev_state.get("files", {})
 
-        # Check if this template_key was previously used at a different path
         if template_key and template_key in prev_files:
             old_path = prev_files[template_key].get("file_path")
             if old_path and old_path != target_path:
@@ -41,7 +41,7 @@ def sync(token, repos, branch, template_content, target_path, commit_message,
         if dry_run:
             action = "update" if existing else "create"
             print(f"  - Dry run: would {action} {target_path} in {repo.full_name}")
-            print(generate_diff(existing, template_content, target_path))
+            dry_run_diffs.append((repo_fullname, action, target_path, existing, template_content))
         else:
             if sha:
                 repo.update_file(target_path, commit_message, template_content, sha, branch=branch)
@@ -51,3 +51,5 @@ def sync(token, repos, branch, template_content, target_path, commit_message,
 
             if state_manager and template_key:
                 state_manager.update_repo_file(repo_fullname, template_key, target_path, sha or "new")
+
+    return dry_run_diffs if dry_run else []
