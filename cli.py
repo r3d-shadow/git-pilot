@@ -24,6 +24,8 @@ def sync_cmd(args):
     state_manager = StateManager(path=args.state_file)
     all_diffs = []
 
+    render_plan = []  # Store what to apply if confirmed
+
     for repo_cfg in config.get('repos', []):
         name = repo_cfg['name']
         branch = repo_cfg.get('branch', defaults.get('branch', 'main'))
@@ -55,42 +57,82 @@ def sync_cmd(args):
             target_path = os.path.join(base_path, filename)
             template_key = tmpl
 
-            if args.provider == 'github':
-                diffs = github.sync(
-                    token=args.token,
-                    repos=[name],
-                    branch=branch,
-                    template_content=content,
-                    target_path=target_path,
-                    commit_message=message,
-                    dry_run=args.dry_run,
-                    state_manager=state_manager,
-                    template_key=template_key
-                )
-                all_diffs.extend(diffs)
-                synced_keys.append(template_key)
+            # Always perform dry-run first
+            diffs = github.sync(
+                token=args.token,
+                repos=[name],
+                branch=branch,
+                template_content=content,
+                target_path=target_path,
+                commit_message=message,
+                dry_run=True,
+                state_manager=state_manager,
+                template_key=template_key
+            )
+            for diff in diffs:
+                all_diffs.append(diff)
+                render_plan.append({
+                    "repo": name,
+                    "branch": branch,
+                    "message": message,
+                    "path": target_path,
+                    "content": content,
+                    "template_key": template_key,
+                    "operation": diff[1]
+                })
+            synced_keys.append(template_key)
 
         removed_paths = state_manager.cleanup_old_templates(name, synced_keys)
 
         for path in removed_paths:
-            if args.dry_run:
-                print(f"  - Dry run: would remove obsolete file {path}")
-                all_diffs.append((name, 'delete', path, False, None))
-            else:
+            all_diffs.append((name, 'delete', path, False, None))
+            render_plan.append({
+                "repo": name,
+                "branch": branch,
+                "message": f"ci-sync: remove obsolete file {path}",
+                "path": path,
+                "content": None,
+                "template_key": None,
+                "operation": "delete"
+            })
+
+    if all_diffs:
+        confirmed = interactive_diff_view(all_diffs)
+        if not confirmed:
+            print("Aborting sync. No changes applied.")
+            return
+
+        # Apply the stored render plan
+        for item in render_plan:
+            repo_name = item["repo"]
+            branch = item["branch"]
+            path = item["path"]
+            message = item["message"]
+            content = item["content"]
+            template_key = item["template_key"]
+            operation = item["operation"]
+
+            if operation == "delete":
                 try:
-                    repo = github.Github(args.token).get_repo(name)
+                    repo = github.Github(args.token).get_repo(repo_name)
                     old_content = repo.get_contents(path, ref=branch)
-                    repo.delete_file(path, f"ci-sync: remove obsolete file {path}", old_content.sha, branch=branch)
+                    repo.delete_file(path, message, old_content.sha, branch=branch)
                     print(f"  - Removed obsolete file {path}")
                 except Exception as e:
                     print(f"  - Warning: Failed to delete obsolete file {path}: {e}")
+            elif operation in ["create", "update"]:
+                github.sync(
+                    token=args.token,
+                    repos=[repo_name],
+                    branch=branch,
+                    template_content=content,
+                    target_path=path,
+                    commit_message=message,
+                    dry_run=False,
+                    state_manager=state_manager,
+                    template_key=template_key
+                )
 
-    if args.dry_run and all_diffs:
-        print("alldiffs")
-        print(all_diffs)
-        interactive_diff_view(all_diffs)
-
-    if not args.dry_run:
         state_manager.save()
 
 def main():
@@ -108,7 +150,6 @@ def main():
     sync_parser.add_argument('--token', required=True, help='Access token')
     sync_parser.add_argument('--template-dir', required=True, help='Directory containing Jinja2 workflow templates')
     sync_parser.add_argument('--values', required=True, help='Path to values.yaml with repo-specific config')
-    sync_parser.add_argument('--dry-run', action='store_true', help='Show changes without committing')
     sync_parser.add_argument('--state-file', default='.ci-sync.json', help='Path to local state file')
     sync_parser.set_defaults(func=sync_cmd)
 
