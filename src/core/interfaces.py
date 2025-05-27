@@ -43,9 +43,9 @@ class StateInterface(ABC):
         pass
 
     @abstractmethod
-    def cleanup_old(self, repo: str, keys: List[str]) -> List[str]:
+    def cleanup_old(self, repo: str, keys: List[str], current_branch: Optional[str] = None) -> List[str]:
         """
-        Remove state entries not in `keys` for the given repo.
+        Remove state entries not in `keys` or with mismatching branch for the given repo.
         Returns list of file paths that should be deleted remotely.
         """
         pass

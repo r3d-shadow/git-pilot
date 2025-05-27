@@ -1,5 +1,3 @@
-# src/ci_sync/diff/interactive.py
-
 import sys
 import termios
 import tty
@@ -38,12 +36,17 @@ class RichDiffViewer(DiffViewerInterface):
             self.console.print("[bold cyan]Interactive Dry Run Diff Viewer[/bold cyan]")
             self.console.print("Use [green]↑ ↓[/green] to navigate, [yellow]Enter[/yellow] to toggle diff, [bold]y[/bold]/[bold]n[/bold] to confirm.\n")
 
-            for idx, (repo, op, path, old, new) in enumerate(file_diffs):
+            for idx, (repo, branch, op, path, old, new) in enumerate(file_diffs):
                 prefix = "👉" if idx == selected else "  "
                 can_show = bool((old and old.strip()) or (new and new.strip()))
-                status = "[green](shown)[/green]" if show_flags[idx] and can_show else "[red](hidden)[/red]" if can_show else "[grey62](no content)[/grey62]"
+                status = (
+                    "[green](shown)[/green]" if show_flags[idx] and can_show else
+                    "[red](hidden)[/red]" if can_show else
+                    "[grey62](no content)[/grey62]"
+                )
 
-                self.console.print(f"{prefix} {repo}/{path} [{op.upper()}] {status}")
+                self.console.print(f"{prefix} {repo} ({branch})/{path} [{op.upper()}] {status}")
+
                 if show_flags[idx] and can_show:
                     panel = DiffGenerator.generate(old, new, path)
                     self.console.print(panel)
@@ -61,5 +64,5 @@ class RichDiffViewer(DiffViewerInterface):
             elif key == "\x1b[B":       # down arrow
                 selected = (selected + 1) % len(file_diffs)
             elif key == "\r":           # enter
-                if bool((file_diffs[selected][3] or "").strip()) or bool((file_diffs[selected][4] or "").strip()):
+                if bool((file_diffs[selected][4] or "").strip()) or bool((file_diffs[selected][5] or "").strip()):
                     show_flags[selected] = not show_flags[selected]

@@ -25,10 +25,10 @@ class SyncEngine:
         plan = []
 
         for repo_cfg in config.repos:
-            # Merge variables
+            # Merge variables with defaults
             merged_vars = dict(ChainMap(repo_cfg.vars, defaults.get('vars', {})))
 
-            # Get templates to use
+            # Get templates to use by matching patterns
             patterns = repo_cfg.templates or defaults.get('templates', [])
             templates = self.template_eng.list_templates(self.template_eng.root_dir)
             selected = [t for t in templates if any(re.fullmatch(p, t) for p in patterns)]
@@ -51,7 +51,7 @@ class SyncEngine:
                 target_path = os.path.join(path_root, tmpl.rsplit('.', 1)[0])  # strip extension
                 key = tmpl
 
-                # Dry run: preview changes
+                # Dry run: get diffs
                 diffs, _ = self.provider.sync(
                     repo=repo_cfg.name,
                     branch=branch,
@@ -61,7 +61,12 @@ class SyncEngine:
                     dry_run=True
                 )
 
-                all_diffs.extend(diffs)
+                # Add branch into each diff tuple for uniformity
+                all_diffs.extend([
+                    (repo_cfg.name, branch, op, path, old, new)
+                    for (_, op, path, old, new) in diffs
+                ])
+
                 for d in diffs:
                     plan.append(dict(
                         repo=repo_cfg.name,
@@ -75,13 +80,14 @@ class SyncEngine:
 
                 synced_keys.append(key)
 
-            # Track deletions of stale files
-            old = self.state_mgr.cleanup_old(repo_cfg.name, synced_keys)
-            for p in old:
-                all_diffs.append((repo_cfg.name, 'delete', p, None, None))
+            # Cleanup old state and prepare deletions
+            # Important: assume cleanup_old returns List[Tuple[file_path, branch]]
+            old_files = self.state_mgr.cleanup_old(repo_cfg.name, synced_keys, branch)
+            for p, old_branch in old_files:
+                all_diffs.append((repo_cfg.name, old_branch, 'delete', p, None, None))
                 plan.append(dict(
                     repo=repo_cfg.name,
-                    branch=branch,
+                    branch=old_branch,
                     path=p,
                     content=None,
                     message=f"remove {p}",
@@ -89,17 +95,16 @@ class SyncEngine:
                     op='delete'
                 ))
 
-        # Exit early if no changes
         if not all_diffs:
             Logger.get_logger().info("Nothing to do.")
             return
 
-        # Interactive diff approval
+        # Show interactive diff and confirm
         if not self.diff_viewer.show(all_diffs):
             Logger.get_logger().info("Aborted.")
             return
 
-        # Apply actual changes
+        # Apply changes
         for item in plan:
             if item["op"] == "delete":
                 self.provider.delete(
