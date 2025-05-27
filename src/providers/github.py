@@ -16,55 +16,27 @@ class GitHubProvider(ProviderInterface):
         content: str,
         commit_message: str,
         dry_run: bool,
-        state_manager,
-        template_key: Optional[str] = None
-    ) -> List[Tuple[str, str, str, Any, Any]]:
+    ) -> Tuple[List[Tuple[str, str, str, Any, Any]], Optional[str]]:
         """
-        Dry-run: returns list of diffs (repo, action, path, old, new).
-        Real run: creates/updates file and updates state_manager.
+        Returns:
+            - List of diffs (repo, action, path, old, new)
+            - SHA of the committed file (if not dry-run and create/update)
         """
-        diffs: List[Tuple[str, str, str, Any, Any]] = []
+        diffs = []
+        sha = None
         repository = self.client.get_repo(repo)
         Logger.get_logger().debug(f"Processing {repo} on branch {branch}...")
 
-        # 1. Delete old path if moved
-        prev_files = (
-            state_manager.state.get("repos", {})
-            .get(repo, {})
-            .get("files", {})
-        )
-        if template_key and template_key in prev_files:
-            old_path = prev_files[template_key]["file_path"]
-            if old_path and old_path != path:
-                if dry_run:
-                    Logger.get_logger().debug(f"  - Dry run: would delete old file {old_path}")
-                    diffs.append((repo, "delete", old_path, None, None))
-                else:
-                    try:
-                        old_obj = repository.get_contents(old_path, ref=branch)
-                        repository.delete_file(
-                            old_path,
-                            f"git-pilot: remove old workflow file {old_path}",
-                            old_obj.sha,
-                            branch=branch
-                        )
-                        Logger.get_logger().info(f"  - Deleted old file {old_path}")
-                    except Exception as e:
-                        Logger.get_logger().error(f"  - Warning: could not delete {old_path}: {e}")
-
-        # 2. Fetch existing file
         try:
             contents = repository.get_contents(path, ref=branch)
             existing = contents.decoded_content.decode()
             sha = contents.sha
         except Exception:
             existing = None
-            sha = None
 
-        # 3. If identical, skip
         if is_same(existing, content):
             Logger.get_logger().info(f"  - {repo}:{branch} [{path}] Skipped: already up to date")
-            return diffs
+            return diffs, sha
 
         action = "update" if existing else "create"
         if dry_run:
@@ -72,24 +44,15 @@ class GitHubProvider(ProviderInterface):
             diffs.append((repo, action, path, existing, content))
         else:
             if sha:
-                repository.update_file(path, commit_message, content, sha, branch=branch)
+                res = repository.update_file(path, commit_message, content, sha, branch=branch)
+                sha = res["content"].sha
                 Logger.get_logger().info(f"  - Updated {path}")
             else:
-                repository.create_file(path, commit_message, content, branch=branch)
+                res = repository.create_file(path, commit_message, content, branch=branch)
+                sha = res["content"].sha
                 Logger.get_logger().info(f"  - Created {path}")
 
-            # Update state
-            if state_manager and template_key:
-                state_manager.state \
-                    .setdefault("repos", {}) \
-                    .setdefault(repo, {}) \
-                    .setdefault("files", {})[template_key] = {
-                        "file_path": path,
-                        "sha": sha or "new",
-                        "last_synced": state_manager._now_iso()
-                    }
-
-        return diffs
+        return diffs, sha
 
     def delete(
         self,

@@ -1,6 +1,7 @@
 import os
 import re
 from collections import ChainMap
+from typing import Dict, Any
 from src.core.interfaces import ProviderInterface, StateInterface, TemplateInterface, DiffViewerInterface
 from src.utils.logger import Logger
 
@@ -40,22 +41,24 @@ class SyncEngine:
             message = getattr(repo_cfg, 'message', None)
             path_root = getattr(repo_cfg, 'path', None)
 
-            # Validate required fields
             if not branch or not message or not path_root:
                 Logger.get_logger().error(f"Missing required fields in config for repo '{repo_cfg.name}'")
                 raise ValueError(f"Missing required fields in config for repo '{repo_cfg.name}'")
 
             synced_keys = []
             for tmpl in selected:
-                # Render template
                 content = self.template_eng.render(tmpl, merged_vars)
-                target_path = os.path.join(path_root, tmpl.rsplit('.', 1)[0])  # e.g., ".github/workflows/foo"
-
+                target_path = os.path.join(path_root, tmpl.rsplit('.', 1)[0])  # strip extension
                 key = tmpl
-                diffs = self.provider.sync(
-                    repo_cfg.name, branch, target_path,
-                    content, message, True,
-                    self.state_mgr, key
+
+                # Dry run: preview changes
+                diffs, _ = self.provider.sync(
+                    repo=repo_cfg.name,
+                    branch=branch,
+                    path=target_path,
+                    content=content,
+                    commit_message=message,
+                    dry_run=True
                 )
 
                 all_diffs.extend(diffs)
@@ -67,11 +70,12 @@ class SyncEngine:
                         content=content,
                         message=message,
                         key=key,
-                        op=d[1]
+                        op=d[1]  # 'create' or 'update'
                     ))
+
                 synced_keys.append(key)
 
-            # Cleanup old files no longer synced
+            # Track deletions of stale files
             old = self.state_mgr.cleanup_old(repo_cfg.name, synced_keys)
             for p in old:
                 all_diffs.append((repo_cfg.name, 'delete', p, None, None))
@@ -95,13 +99,35 @@ class SyncEngine:
             Logger.get_logger().info("Aborted.")
             return
 
-        # Apply plan
+        # Apply actual changes
         for item in plan:
-            self.provider.sync(
-                item['repo'], item['branch'], item['path'],
-                item['content'], item['message'], False,
-                self.state_mgr, item['key']
-            )
+            if item["op"] == "delete":
+                self.provider.delete(
+                    repo=item["repo"],
+                    branch=item["branch"],
+                    path=item["path"],
+                    commit_message=item["message"]
+                )
+            else:
+                diffs, sha = self.provider.sync(
+                    repo=item["repo"],
+                    branch=item["branch"],
+                    path=item["path"],
+                    content=item["content"],
+                    commit_message=item["message"],
+                    dry_run=False
+                )
+
+                if item["key"]:
+                    self.state_mgr.state \
+                        .setdefault("repos", {}) \
+                        .setdefault(item["repo"], {}) \
+                        .setdefault("files", {})[item["key"]] = {
+                            "file_path": item["path"],
+                            "sha": sha or "unknown",
+                            "branch": item["branch"],
+                            "last_synced": self.state_mgr._now_iso()
+                        }
 
         self.state_mgr.save()
         Logger.get_logger().info("Sync complete.")

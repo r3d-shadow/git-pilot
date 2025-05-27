@@ -11,8 +11,6 @@ class ProviderInterface(ABC):
         content: str,
         commit_message: str,
         dry_run: bool,
-        state_manager: 'StateInterface',
-        template_key: Optional[str]
     ) -> List[Tuple[str, str, str, Any, Any]]:
         """
         Perform create/update dry-run or real sync of a single file.

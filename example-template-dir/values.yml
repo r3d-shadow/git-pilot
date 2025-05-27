@@ -1,5 +1,5 @@
 defaults:
-  branch: dev
+  branch: main
   message: "git-pilot: update CI workflow"
   path: ".github/workflows"
   vars:
