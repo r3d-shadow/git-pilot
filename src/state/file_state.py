@@ -3,7 +3,6 @@ import os
 import time
 from src.core.interfaces import StateInterface
 
-
 class FileStateManager(StateInterface):
     def __init__(self, path: str):
         self.path = path
@@ -22,39 +21,73 @@ class FileStateManager(StateInterface):
             json.dump(self.state, f, indent=2)
         os.replace(tmp, self.path)
 
-    def cleanup_old(self, repo: str, current_keys, current_branch: str):
-        """
-        Remove state entries whose keys are not in current_keys
-        or whose branch does not match the current branch.
-
-        Returns list of (file_path, branch) tuples to delete from the remote.
-        """
+    def cleanup_old(self, repo: str, branch: str, current_keys):
         removed_files = []
-        repo_state = self.state.get("repos", {}).get(repo, {})
-        files = repo_state.get("files", {})
 
-        old_keys = set(files.keys())
-        to_remove = set()
+        branch_files = self.state \
+            .get("repos", {}) \
+            .get(repo, {}) \
+            .get("branches", {}) \
+            .get(branch, {}) \
+            .get("files", {})
 
-        for key in old_keys:
-            file_entry = files[key]
-            # Mark for removal if key not in current keys or branch changed
-            if key not in current_keys or file_entry.get("branch") != current_branch:
-                old_path = file_entry.get("file_path")
-                old_branch = file_entry.get("branch")
-                if old_path and old_branch:
-                    removed_files.append((old_path, old_branch))
-                to_remove.add(key)
+        old_keys = set(branch_files.keys())
+        to_remove = old_keys - set(current_keys)
 
         for key in to_remove:
-            del files[key]
+            file_entry = branch_files[key]
+            path = file_entry.get("path")
+            if path:
+                removed_files.append(path)
+            del branch_files[key]
 
-        if not files:
+        # Clean up empty structures
+        if not branch_files:
+            self.state["repos"][repo]["branches"].pop(branch, None)
+        if not self.state["repos"][repo]["branches"]:
             self.state["repos"].pop(repo, None)
-        else:
-            self.state["repos"][repo]["files"] = files
 
         return removed_files
+
+    def cleanup_old_branches(self, repo: str, active_branches: set):
+        """
+        Remove branches from the state that are no longer active.
+        Return list of tuples: (branch_name, file_path) for deletion.
+        """
+        removed_files = []
+        repo_branches = self.state.get("repos", {}).get(repo, {}).get("branches", {})
+
+        if not repo_branches:
+            return removed_files
+
+        branches_to_remove = set(repo_branches.keys()) - active_branches
+
+        for branch in branches_to_remove:
+            branch_files = repo_branches.get(branch, {}).get("files", {})
+            for key, file_entry in branch_files.items():
+                path = file_entry.get("path")
+                if path:
+                    removed_files.append((branch, path))
+            # Remove the entire branch
+            repo_branches.pop(branch, None)
+
+        # If no branches left, remove the repo
+        if not repo_branches:
+            self.state["repos"].pop(repo, None)
+
+        return removed_files
+
+    def update_file_entry(self, repo: str, branch: str, key: str, file_path: str, sha: str, rendered: str):
+        self.state.setdefault("repos", {}) \
+            .setdefault(repo, {}) \
+            .setdefault("branches", {}) \
+            .setdefault(branch, {}) \
+            .setdefault("files", {})[key] = {
+                "path": file_path,
+                "sha": sha,
+                "rendered": rendered,
+                "updated_at": self._now_iso()
+            }
 
     def _now_iso(self):
         return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

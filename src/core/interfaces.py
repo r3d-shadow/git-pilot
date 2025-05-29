@@ -10,11 +10,8 @@ class ProviderInterface(ABC):
         path: str,
         content: str,
         commit_message: str,
-        dry_run: bool,
     ) -> List[Tuple[str, str, str, Any, Any]]:
         """
-        Perform create/update dry-run or real sync of a single file.
-        Returns diffs when dry_run=True.
         """
         pass
 

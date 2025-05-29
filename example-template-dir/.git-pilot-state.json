@@ -1,18 +1,36 @@
 {
   "repos": {
+    "r3d-shadow/git-pilot-test-2": {
+      "branches": {
+        "main": {
+          "files": {
+            "override-example.yml.j2": {
+              "path": ".github/workflows/git-pilot/override-example.yml",
+              "sha": "bcaad065bf9020f732369b949883a28158f5f16aabd4d256bdd7c5bc80ef59b6",
+              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello3 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+              "updated_at": "2025-05-29T04:45:59Z"
+            }
+          }
+        }
+      }
+    },
     "r3d-shadow/git-pilot-test-1": {
-      "files": {
-        "example.yml.j2": {
-          "file_path": ".github/workflows/example.yml",
-          "sha": "0bbbc7c805192c765ec972228a7ab3618c505d6c",
-          "branch": "main",
-          "last_synced": "2025-05-27T17:09:44Z"
-        },
-        "override-example.yml.j2": {
-          "file_path": ".github/workflows/override-example.yml",
-          "sha": "64c1feb19aa3dafc259d9bf4b62dfe59f8f1952f",
-          "branch": "main",
-          "last_synced": "2025-05-27T17:09:46Z"
+      "branches": {
+        "dev": {
+          "files": {
+            "example.yml.j2": {
+              "path": ".github/workflows/example.yml",
+              "sha": "61afadc6b00e2152994acf59c0a56b80d147e8c70054801f4afbb9c27977709a",
+              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v3\n\n      - name: Hello World\n        run: echo \"Hello, World from job CONTAINER_SCAN1!\"",
+              "updated_at": "2025-05-29T04:44:52Z"
+            },
+            "override-example.yml.j2": {
+              "path": ".github/workflows/override-example.yml",
+              "sha": "6fd2c3a0ce331266f2c8b658553a800e9598f25a54cd7f360837cb97ffb75798",
+              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello3 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+              "updated_at": "2025-05-29T04:45:56Z"
+            }
+          }
         }
       }
     }
