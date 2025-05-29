@@ -5,8 +5,6 @@ from typing import Dict, Any
 from src.core.interfaces import ProviderInterface, StateInterface, TemplateInterface, DiffViewerInterface
 from src.utils.logger import Logger
 from src.utils.hash import compute_sha
-import time
-import json
 
 
 class SyncEngine:
@@ -22,13 +20,13 @@ class SyncEngine:
         self.template_eng = template_eng
         self.diff_viewer = diff_viewer
 
-    def sync(self, config):
-        defaults = config.defaults
+    def sync(self, config: Any) -> None:
+        defaults = config.defaults or {}
         all_diffs = []
         plan = []
 
         for repo_cfg in config.repos:
-            merged_vars = dict(ChainMap(repo_cfg.vars, defaults.get('vars', {})))
+            merged_vars = dict(ChainMap(repo_cfg.vars or {}, defaults.get('vars', {})))
 
             patterns = repo_cfg.templates or defaults.get('templates', [])
             templates = self.template_eng.list_templates(self.template_eng.root_dir)
@@ -42,7 +40,7 @@ class SyncEngine:
             message = getattr(repo_cfg, 'message', None)
             path_root = getattr(repo_cfg, 'path', None)
 
-            if not branch or not message or not path_root:
+            if not (branch and message and path_root):
                 Logger.get_logger().error(f"Missing required fields in config for repo '{repo_cfg.name}'")
                 raise ValueError(f"Missing required fields in config for repo '{repo_cfg.name}'")
 
@@ -54,13 +52,7 @@ class SyncEngine:
                 key = tmpl
                 current_sha = compute_sha(content)
 
-                existing_entry = self.state_mgr.state.get("repos", {}) \
-                    .get(repo_cfg.name, {}) \
-                    .get("branches", {}) \
-                    .get(branch, {}) \
-                    .get("files", {}) \
-                    .get(key, {})
-
+                existing_entry = self._get_existing_entry(repo_cfg.name, branch, key)
                 previous_sha = existing_entry.get("sha")
                 previous_content = existing_entry.get("rendered")
 
@@ -71,8 +63,7 @@ class SyncEngine:
                     continue
 
                 action = "update" if previous_sha else "create"
-                diffs = [(repo_cfg.name, branch, action, target_path, previous_content, content)]
-                all_diffs.extend(diffs)
+                all_diffs.append((repo_cfg.name, branch, action, target_path, previous_content, content))
 
                 plan.append(dict(
                     repo=repo_cfg.name,
@@ -99,20 +90,19 @@ class SyncEngine:
                     op='delete'
                 ))
 
-            # ALSO cleanup old branches that are no longer active in config for this repo
+            # Cleanup old branches no longer active for this repo
             active_branches = {getattr(r, 'branch', None) for r in config.repos if r.name == repo_cfg.name}
-            # Remove None values just in case
             active_branches.discard(None)
 
             old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
-            for branch, path in old_branch_files:
-                all_diffs.append((repo_cfg.name, branch, 'delete', path, None, None))
+            for branch_name, path in old_branch_files:
+                all_diffs.append((repo_cfg.name, branch_name, 'delete', path, None, None))
                 plan.append(dict(
                     repo=repo_cfg.name,
-                    branch=branch,
+                    branch=branch_name,
                     path=path,
                     content=None,
-                    message=f"remove {path} from old branch {branch}",
+                    message=f"remove {path} from old branch {branch_name}",
                     key=None,
                     op='delete'
                 ))
@@ -141,7 +131,6 @@ class SyncEngine:
                     content=item["content"],
                     commit_message=item["message"],
                 )
-
                 if item["key"]:
                     self.state_mgr.update_file_entry(
                         repo=item["repo"],
@@ -154,3 +143,11 @@ class SyncEngine:
 
         self.state_mgr.save()
         Logger.get_logger().info("Sync complete.")
+
+    def _get_existing_entry(self, repo: str, branch: str, key: str) -> dict:
+        return self.state_mgr.state.get("repos", {}) \
+            .get(repo, {}) \
+            .get("branches", {}) \
+            .get(branch, {}) \
+            .get("files", {}) \
+            .get(key, {})
