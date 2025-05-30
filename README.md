@@ -1,73 +1,117 @@
-# ci‑sync
+# git‑sync
 
-A lightweight, extensible CLI tool to automate the distribution and synchronization of GitHub Actions workflows across multiple repositories. Inspired by GitOps, Helm-style templating, and modular CI/CD practices, ci‑sync uses Jinja2 templates and a single configuration file to manage workflow updates, cleanup, and preview.
+A lightweight, extensible CLI tool to automate the distribution and synchronization of GitHub Actions workflows across multiple repositories. Inspired by GitOps, Helm-style templating, and modular CI/CD practices, `git-pilot` uses Jinja2 templates and a single configuration file to manage workflow updates, cleanup, and preview.
 
-## Overview
+---
 
-ci‑sync centralizes CI/CD pipeline management by allowing organizations to define reusable workflow templates in one place and apply them to any set of repositories. It tracks previous deployments, offers dry‑run previews with interactive diffs, and automatically removes obsolete workflow files.
+## 🚀 Key Features
 
-## Key Features
+- **Multi‑Repository Sync**: Apply one or more workflow templates to any number of repositories with a single command.
+- **Helm‑Style Templating**: Supports `.tpl` macros, includes, and dynamic variable injection.
+- **Per‑Repository Overrides**: Customize branches, commit messages, paths, variables, and template selection per repository.
+- **Regex‑Driven Template Selection**: Use patterns to precisely control which templates apply to which repositories.
+- **Interactive Change Preview**: Before applying changes, see a side-by-side comparison of created, updated, and deleted files with toggles and highlights.
+- **State Management**: Tracks previously synced workflows and automatically cleans up obsolete files.
+- **Extensible Provider Model**: Built-in support for GitHub, with support for other platforms planned.
 
-* **Multi‑Repository Sync**: Apply one or more workflow templates to any number of repositories with a single command.
-* **Helm‑Style Jinja2 Templating**: Render dynamic workflows using structured templates, shared partials, and helper macros. Supports `.tpl` files for reusable logic.
-* **Per‑Repository Overrides**: Customize branch targets, commit messages, file paths, template variables, and template patterns for each repository.
-* **Regex‑Driven Template Selection**: Use glob or regex patterns to control which templates apply to which repos.
-* **Interactive Dry‑Run with Diffs**: Preview and toggle exact changes in each file before committing, with keyboard navigation and diff panels.
-* **State Management**: Persist a local state file to track previously synced files and remove renamed or obsolete workflows automatically.
-* **Extensible Provider Model**: Built around a provider abstraction, currently supports GitHub with the ability to add GitLab, Azure DevOps, or other platforms.
+---
 
-## Getting Started
+## 📦 Installation
 
-1. **Installation**
+Install the tool using pip:
 
-   * Install via pip or clone the repository
-   * Ensure dependencies for Jinja2, PyYAML, PyGithub, Rich are available
+```bash
+pip install git-pilot
+```
 
-2. **Directory Layout**
+---
 
-   * **templates/**: Jinja2 template files with support for Helm-style layout and `.tpl` helpers
-   * **includes/**: Shared macro files and template functions
-   * **core/**: Loader, comparator, diff and state management modules
-   * **providers/**: API integrations (e.g. GitHub)
-   * **cli.py**: Main command‑line interface
-   * **values.yml**: Configuration file defining defaults and per‑repo settings
+## Usage
 
-3. **Configuration**
+Initialize a new template structure: Creates a starter template directory (test/) with example templates, partials, and a values.yml file. Useful for bootstrapping a new setup.
 
-   * Define global defaults for branch, file path, commit message, template patterns, and variables.
-   * List repositories with optional overrides for any of those settings and include custom variables.
+```bash
+git-pilot init --template-dir test
+```
 
-4. **Usage**
+Run synchronization across configured repositories: Renders templates with variables, compares with the current state in each repository, and shows an interactive preview of changes. Applies updates only after confirmation.
 
-   * Run the CLI with parameters for access token, template directory, values file, and optional dry‑run.
-   * Use interactive diff viewer to toggle and inspect changes.
-   * Commit changes by omitting dry‑run.
+```bash
+git-pilot sync \
+  --token <your-github-token> \
+  --templates test \
+  --values test/values.yml
+```
 
-## Configuration File (`values.yml`)
+### Options:
 
-* **defaults**: Global settings applied to all repositories.
-* **repos**: A list or map of repository entries, each with a name and any overrides.
-* **templates**: Regex patterns controlling which template files get rendered for each repo.
-* **vars**: Key‑value pairs passed into the templates for dynamic substitution.
+| Flag          | Description                            |
+| ------------- | -------------------------------------- |
+| `--token`     | GitHub Personal Access Token           |
+| `--templates` | Path to the root template directory    |
+| `--values`    | Path to the config file (`values.yml`) |
 
-## Templating
+---
 
-* Uses Helm-style Jinja2 rendering engine.
-* Templates live under a central directory and may include shared partials or `.tpl` helper macros.
-* Custom delimiters (`[[ ... ]]`, `[% ... %]`) avoid conflicts with GitHub Actions syntax.
-* Supports reusable functions like `indent`, `to_yaml`, etc. through globally injected macros.
+## 🧩 Configuration (`values.yml`)
 
-## State Management
+The configuration file defines global defaults and per-repo overrides for:
 
-* A local JSON state file records the last synced path and SHA for each template in each repository.
-* When a template or path changes, ci‑sync will remove the obsolete workflow file before applying the new one.
-* State updates are atomic, ensuring consistency across runs.
+* Branch name
+* Commit message
+* Target directory for rendered templates
+* Regex patterns for template selection
+* Variables to inject into templates
 
-## Contributing
+See the [Configuration Reference](docs/configuration.md) for a detailed breakdown.
 
-Contributions are welcome! To contribute:
+---
 
-1. Fork the repository and clone locally.
-2. Run the test suite and ensure linters pass.
-3. Implement new features or fixes, following existing code style.
-4. Submit a pull request with a clear description of changes.
+## 🧠 Templating
+
+`git-pilot` supports Helm-style rendering using Jinja2, including:
+
+* Custom delimiters to avoid conflicts with GitHub Actions syntax
+* Shared macro files and reusable partial templates
+* Built-in helper functions like `indent`, `to_yaml`, `tpl()`, etc.
+
+See the [Templating Guide](docs/templating.md) for structure and usage examples.
+
+---
+
+## 💾 State Management
+
+A local JSON state file tracks:
+
+* Which templates were applied to which repositories and branches
+* SHA of the rendered content to detect changes
+* Obsolete workflows to remove when templates are no longer matched
+
+This ensures safe, idempotent operations and automatic cleanup.
+
+---
+
+## 🧪 Interactive Comparison Viewer
+
+Before applying changes, `git-pilot` presents a full summary:
+
+* **Created**: New files to be added
+* **Updated**: Modified files with side-by-side diffs
+* **Deleted**: Stale or obsolete files to be removed
+
+You can visually inspect changes before confirming. Nothing is pushed until confirmed.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! To get started:
+
+1. Create a virtual environment and install dev dependencies.
+2. Run the test suite and linters.
+3. Implement your feature or fix.
+4. Submit a pull request with a clear description.
+
+See the [Technical Architecture Guide](docs/architecture-guide) for details.
+
+---
