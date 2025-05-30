@@ -6,9 +6,9 @@
           "files": {
             "override-example.yml.j2": {
               "path": ".github/workflows/git-pilot/override-example.yml",
-              "sha": "71c758b252c64225b95a3067faf9969c75134cbe1f5d00ef4dd4c666164cf096",
-              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello5 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-              "updated_at": "2025-05-30T02:38:04Z"
+              "sha": "4cde61aa28e23a8846890a7ea6087212759b43ad5e7e4799245ad70e0dfd4eb8",
+              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello6 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+              "updated_at": "2025-05-30T04:07:52Z"
             }
           }
         }
@@ -26,9 +26,9 @@
             },
             "override-example.yml.j2": {
               "path": ".github/workflows/override-example.yml",
-              "sha": "2607351a656d37f6a46ef51b3cb8c8c1c2ab61024468acad5272277d6af50354",
-              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello5 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-              "updated_at": "2025-05-30T02:38:01Z"
+              "sha": "1f0aa21d4fd0204c8cab77373601c23390e4b54f29e904ae07162a6d4af9dbb0",
+              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello6 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+              "updated_at": "2025-05-30T04:07:50Z"
             }
           }
         }

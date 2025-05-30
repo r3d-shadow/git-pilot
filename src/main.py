@@ -1,9 +1,6 @@
-from src.cli.parsers import build_parser
+from src.cli.parsers import ParserBuilder
 
 def main():
-    parser = build_parser()
+    parser = ParserBuilder().with_init_command().with_sync_command().build()
     args = parser.parse_args()
     args.command.execute(args)
-
-if __name__ == "__main__":
-    main()

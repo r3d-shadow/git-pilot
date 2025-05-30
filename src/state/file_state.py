@@ -1,9 +1,8 @@
 import json
 import os
 import time
-from typing import List, Tuple, Optional, Set
+from typing import List, Tuple, Set
 from src.core.interfaces import StateInterface
-
 
 class FileStateManager(StateInterface):
     def __init__(self, path: str):
@@ -25,6 +24,9 @@ class FileStateManager(StateInterface):
 
     def _get_branch_files(self, repo: str, branch: str) -> dict:
         return self.state.get("repos", {}).get(repo, {}).get("branches", {}).get(branch, {}).get("files", {})
+
+    def get_file_entry(self, repo: str, branch: str, key: str) -> dict:
+        return self._get_branch_files(repo, branch).get(key, {})
 
     def cleanup_old(self, repo: str, branch: str, current_keys: List[str]) -> List[str]:
         removed_files = []
@@ -52,13 +54,8 @@ class FileStateManager(StateInterface):
         return removed_files
 
     def cleanup_old_branches(self, repo: str, active_branches: Set[str]) -> List[Tuple[str, str]]:
-        """
-        Remove branches from the state that are no longer active.
-        Return list of tuples: (branch_name, file_path) for deletion.
-        """
         removed_files = []
         repo_branches = self.state.get("repos", {}).get(repo, {}).get("branches", {})
-
         if not repo_branches:
             return removed_files
 

@@ -10,7 +10,6 @@ class SyncFacade:
         self.state = FileStateManager(state_file)
         self.template = JinjaTemplateEngine(template_dir)
         self.diff = RichDiffViewer()
-        # Dependency Injection completed
 
     def sync(self, config):
         engine = SyncEngine(

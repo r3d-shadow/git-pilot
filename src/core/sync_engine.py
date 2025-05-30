@@ -1,6 +1,5 @@
 import os
 import re
-from collections import ChainMap
 from typing import Any
 from src.core.interfaces import ProviderInterface, StateInterface, TemplateInterface, DiffViewerInterface
 from src.utils.logger import Logger
@@ -13,7 +12,7 @@ class SyncEngine:
         provider: ProviderInterface,
         state_mgr: StateInterface,
         template_eng: TemplateInterface,
-        diff_viewer: DiffViewerInterface
+        diff_viewer: DiffViewerInterface,
     ):
         self.provider = provider
         self.state_mgr = state_mgr
@@ -50,7 +49,7 @@ class SyncEngine:
                 key = tmpl
                 current_sha = compute_sha(content)
 
-                existing_entry = self._get_existing_entry(repo_cfg.name, branch, key)
+                existing_entry = self.state_mgr.get_file_entry(repo_cfg.name, branch, key)
                 previous_sha = existing_entry.get("sha")
                 previous_content = existing_entry.get("rendered")
 
@@ -74,7 +73,6 @@ class SyncEngine:
                     sha=current_sha
                 ))
 
-            # Cleanup old files for current branch
             old_files = self.state_mgr.cleanup_old(repo_cfg.name, branch, synced_keys)
             for p in old_files:
                 all_diffs.append((repo_cfg.name, branch, 'delete', p, None, None))
@@ -88,7 +86,6 @@ class SyncEngine:
                     op='delete'
                 ))
 
-            # Cleanup old branches no longer active for this repo
             active_branches = {r.branch for r in config.repos if r.name == repo_cfg.name}
             old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
             for branch_name, path in old_branch_files:
@@ -139,11 +136,3 @@ class SyncEngine:
 
         self.state_mgr.save()
         Logger.get_logger().info("Sync complete.")
-
-    def _get_existing_entry(self, repo: str, branch: str, key: str) -> dict:
-        return self.state_mgr.state.get("repos", {}) \
-            .get(repo, {}) \
-            .get("branches", {}) \
-            .get(branch, {}) \
-            .get("files", {}) \
-            .get(key, {})
