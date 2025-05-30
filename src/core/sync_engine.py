@@ -5,7 +5,6 @@ from src.core.interfaces import ProviderInterface, StateInterface, TemplateInter
 from src.utils.logger import Logger
 from src.utils.hash import compute_sha
 
-
 class SyncEngine:
     def __init__(
         self,
@@ -13,11 +12,13 @@ class SyncEngine:
         state_mgr: StateInterface,
         template_eng: TemplateInterface,
         diff_viewer: DiffViewerInterface,
+        interactive: bool = True  
     ):
         self.provider = provider
         self.state_mgr = state_mgr
         self.template_eng = template_eng
         self.diff_viewer = diff_viewer
+        self.interactive = interactive  
 
     def sync(self, config: Any) -> None:
         all_diffs = []
@@ -79,9 +80,12 @@ class SyncEngine:
             Logger.get_logger().info("Nothing to do.")
             return
 
-        if not self.diff_viewer.show(all_diffs):
-            Logger.get_logger().info("Aborted.")
-            return
+        if self.interactive:
+            if not self.diff_viewer.show(all_diffs):
+                Logger.get_logger().info("Aborted.")
+                return
+        else:
+            Logger.get_logger().info("Non-interactive mode: Skipping diff viewer.")
 
         for item in plan:
             if item["op"] == "delete":
