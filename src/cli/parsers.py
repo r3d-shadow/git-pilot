@@ -19,6 +19,11 @@ class ParserBuilder:
         sync_parser.add_argument('--template-dir', required=True)
         sync_parser.add_argument('--values', required=True)
         sync_parser.add_argument('--state-file', default='.git-pilot-state.json')
+        sync_parser.add_argument(
+            "--non-interactive",
+            action="store_true",
+            help="Run sync in non-interactive mode (auto-approve all changes)"
+        )
         sync_parser.set_defaults(command=SyncCommand())
         return self
 

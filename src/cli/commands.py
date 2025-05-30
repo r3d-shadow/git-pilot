@@ -21,4 +21,4 @@ class SyncCommand(Command):
             template_dir=args.template_dir,
             state_file=args.state_file
         )
-        facade.sync(config)
+        facade.sync(config, interactive=not getattr(args, "non_interactive", False))
