@@ -103,6 +103,11 @@ class SyncEngine:
                     content=item["content"],
                     commit_message=item["message"],
                 )
+
+                Logger.get_logger().info(
+                    f"{item['repo']} ({item['branch']})/{item['path']} [{item['op']}]"
+                )
+
                 if item["key"]:
                     self.state_mgr.update_file_entry(
                         repo=item["repo"],

@@ -29,11 +29,11 @@ class GitHubProvider(ProviderInterface):
             sha = contents.sha
             res = repository.update_file(path, commit_message, content, sha, branch=branch)
             sha = res["content"].sha
-            Logger.get_logger().info(f"  - Updated {path}")
+            Logger.get_logger().debug(f"  - Updated {path}")
         except Exception:
             res = repository.create_file(path, commit_message, content, branch=branch)
             sha = res["content"].sha
-            Logger.get_logger().info(f"  - Created {path}")
+            Logger.get_logger().debug(f"  - Created {path}")
 
         return sha
 
