@@ -1,0 +1,24 @@
+defaults:
+  branch: dev
+  message: "git-pilot: update CI workflow"
+  path: ".github/workflows"
+  vars:
+    ci_name: scan
+  templates:
+    - ".*\\.j2$"
+
+repos:
+  - name: r3d-shadow/git-pilot-test-1
+    vars:
+      job_id: container_scan1
+      env: test
+
+  - name: r3d-shadow/git-pilot-test-2
+    branch: main
+    message: "git-pilot: update CI workflow : Override"
+    path: ".github/workflows/git-pilot/"
+    vars:
+      job_id: sast
+      env: stage
+    templates:
+      - "^override.*\\.j2$"

@@ -1,0 +1,15 @@
+name: [[ ci_name ]]
+
+on:
+  push:
+    branches:
+      - "[[ env ]]"
+
+jobs:
+  [[ job_id ]]:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello from [[ env ]]!
+        run: echo "Hello6 [[ job_id ]]!"
+        env:
+          SUPER_SECRET: ${{ secrets.SuperSecret }}

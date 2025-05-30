@@ -1,0 +1,15 @@
+name: [[ ci_name ]]
+
+on:
+  push:
+    branches:
+      - "[[ env ]]"
+
+jobs:
+  [[ job_id ]]:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      [[ include('units/hello-world.j2') | indent(6) ]]
