@@ -73,32 +73,7 @@ class SyncEngine:
                     sha=current_sha
                 ))
 
-            old_files = self.state_mgr.cleanup_old(repo_cfg.name, branch, synced_keys)
-            for p in old_files:
-                all_diffs.append((repo_cfg.name, branch, 'delete', p, None, None))
-                plan.append(dict(
-                    repo=repo_cfg.name,
-                    branch=branch,
-                    path=p,
-                    content=None,
-                    message=f"remove {p}",
-                    key=None,
-                    op='delete'
-                ))
-
-            active_branches = {r.branch for r in config.repos if r.name == repo_cfg.name}
-            old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
-            for branch_name, path in old_branch_files:
-                all_diffs.append((repo_cfg.name, branch_name, 'delete', path, None, None))
-                plan.append(dict(
-                    repo=repo_cfg.name,
-                    branch=branch_name,
-                    path=path,
-                    content=None,
-                    message=f"remove {path} from old branch {branch_name}",
-                    key=None,
-                    op='delete'
-                ))
+            self._handle_old_files(repo_cfg, synced_keys, all_diffs, plan, config)
 
         if not all_diffs:
             Logger.get_logger().info("Nothing to do.")
@@ -136,3 +111,31 @@ class SyncEngine:
 
         self.state_mgr.save()
         Logger.get_logger().info("Sync complete.")
+
+    def _handle_old_files(self, repo_cfg, synced_keys, all_diffs, plan, config):
+        old_files = self.state_mgr.cleanup_old(repo_cfg.name, repo_cfg.branch, synced_keys)
+        for p in old_files:
+            all_diffs.append((repo_cfg.name, repo_cfg.branch, 'delete', p, None, None))
+            plan.append(dict(
+                repo=repo_cfg.name,
+                branch=repo_cfg.branch,
+                path=p,
+                content=None,
+                message=f"remove {p}",
+                key=None,
+                op='delete'
+            ))
+
+        active_branches = {r.branch for r in config.repos if r.name == repo_cfg.name}
+        old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
+        for branch_name, path in old_branch_files:
+            all_diffs.append((repo_cfg.name, branch_name, 'delete', path, None, None))
+            plan.append(dict(
+                repo=repo_cfg.name,
+                branch=branch_name,
+                path=path,
+                content=None,
+                message=f"remove {path} from old branch {branch_name}",
+                key=None,
+                op='delete'
+            ))
