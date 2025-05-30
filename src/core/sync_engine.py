@@ -1,7 +1,7 @@
 import os
 import re
 from collections import ChainMap
-from typing import Dict, Any
+from typing import Any
 from src.core.interfaces import ProviderInterface, StateInterface, TemplateInterface, DiffViewerInterface
 from src.utils.logger import Logger
 from src.utils.hash import compute_sha
@@ -21,14 +21,12 @@ class SyncEngine:
         self.diff_viewer = diff_viewer
 
     def sync(self, config: Any) -> None:
-        defaults = config.defaults or {}
         all_diffs = []
         plan = []
 
         for repo_cfg in config.repos:
-            merged_vars = dict(ChainMap(repo_cfg.vars or {}, defaults.get('vars', {})))
-
-            patterns = repo_cfg.templates or defaults.get('templates', [])
+            merged_vars = repo_cfg.vars or {}
+            patterns = repo_cfg.templates or []
             templates = self.template_eng.list_templates(self.template_eng.root_dir)
             selected = [t for t in templates if any(re.fullmatch(p, t) for p in patterns)]
 
@@ -36,9 +34,9 @@ class SyncEngine:
                 Logger.get_logger().warning(f"No templates matched for {repo_cfg.name}")
                 continue
 
-            branch = getattr(repo_cfg, 'branch', None)
-            message = getattr(repo_cfg, 'message', None)
-            path_root = getattr(repo_cfg, 'path', None)
+            branch = repo_cfg.branch
+            message = repo_cfg.message
+            path_root = repo_cfg.path
 
             if not (branch and message and path_root):
                 Logger.get_logger().error(f"Missing required fields in config for repo '{repo_cfg.name}'")
@@ -91,9 +89,7 @@ class SyncEngine:
                 ))
 
             # Cleanup old branches no longer active for this repo
-            active_branches = {getattr(r, 'branch', None) for r in config.repos if r.name == repo_cfg.name}
-            active_branches.discard(None)
-
+            active_branches = {r.branch for r in config.repos if r.name == repo_cfg.name}
             old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
             for branch_name, path in old_branch_files:
                 all_diffs.append((repo_cfg.name, branch_name, 'delete', path, None, None))
