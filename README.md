@@ -1,9 +1,6 @@
 # git-pilot
 
-> **One-liner tagline:** Sync workflows, configs, and more across 10+ repos in seconds using Helm-style templates.
-
-> **GitHub Description (160 chars max):**
-> Sync GitHub Actions, configs, and files across multiple repos with Helm-style templates. GitOps-ready, extensible, and built for modern DevOps at scale.
+> Sync workflows, configs, and more across 10+ repos in seconds using Helm-style templates.
 
 ---
 
