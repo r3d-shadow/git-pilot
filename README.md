@@ -1,24 +1,48 @@
-# git‑sync
+# git-pilot
 
-A lightweight, extensible CLI tool to automate the distribution and synchronization of GitHub Actions workflows across multiple repositories. Inspired by GitOps, Helm-style templating, and modular CI/CD practices, `git-pilot` uses Jinja2 templates and a single configuration file to manage workflow updates, cleanup, and preview.
+> **One-liner tagline:** Sync workflows, configs, and more across 10+ repos in seconds using Helm-style templates.
+
+> **GitHub Description (160 chars max):**
+> Sync GitHub Actions, configs, and files across multiple repos with Helm-style templates. GitOps-ready, extensible, and built for modern DevOps at scale.
 
 ---
 
-## 🚀 Key Features
+[![GitHub stars](https://img.shields.io/github/stars/r3d-shadow/git-pilot?style=social)](https://github.com/r3d-shadow/git-pilot/stargazers)
+[![PyPI version](https://img.shields.io/pypi/v/git-pilot)](https://pypi.org/project/git-pilot/)
+[![License](https://img.shields.io/github/license/r3d-shadow/git-pilot)](LICENSE)
 
-- **Multi‑Repository Sync**: Apply one or more workflow templates to any number of repositories with a single command.
-- **Helm‑Style Templating**: Supports `.tpl` macros, includes, and dynamic variable injection.
-- **Per‑Repository Overrides**: Customize branches, commit messages, paths, variables, and template selection per repository.
-- **Regex‑Driven Template Selection**: Use patterns to precisely control which templates apply to which repositories.
-- **Interactive Change Preview**: Before applying changes, see a side-by-side comparison of created, updated, and deleted files with toggles and highlights.
-- **State Management**: Tracks previously synced workflows and automatically cleans up obsolete files.
-- **Extensible Provider Model**: Built-in support for GitHub, with support for other platforms planned.
+---
+
+## 🚀 Why Git-Pilot?
+
+Managing configuration and CI/CD files across 10, 20, or 100+ repositories is a nightmare.
+
+**`git-pilot` is your autopilot for repository file sync.** It brings GitOps discipline, Helm-style templating, and one-command sync to modern DevOps pipelines.
+
+### 🧠 Built for DevEx
+
+* **One command to sync them all:** Apply templates to any number of GitHub repos in one go.
+* **Helm-style power:** Use partials, macros (`.tpl`), and regex-driven rendering logic.
+* **Preview before you push:** Interactive side-by-side diffs before anything is committed.
+* **State-aware syncs:** Tracks changes and removes stale files automatically.
+* **Per-repo flexibility:** Custom branches, commit messages, and variable overrides.
+
+---
+
+## 🧰 What It Does
+
+| Feature                    | Description                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| 🔁 Multi-Repo Sync         | Render and push files across 1 or 100 repos with a single command             |
+| 🧩 Helm-Style Templates    | Use Jinja2 with custom delimiters, includes, and reusable `.tpl` macros       |
+| 🔍 Interactive Diff Viewer | See what changes before you commit—created, updated, deleted files preview    |
+| 🧬 Per-Repo Customization  | Branches, paths, commit messages, and injected variables                      |
+| 🧹 Auto-Cleanup            | Deletes stale files intelligently based on diff and state tracking            |
+| 🌐 GitHub Native (for now) | Built-in support for GitHub with extensible architecture for future providers |
 
 ---
 
 ## 📦 Installation
-
-Install the tool using pip:
 
 ```bash
 pip install git-pilot
@@ -26,92 +50,114 @@ pip install git-pilot
 
 ---
 
-## Usage
+## ✨ Getting Started: First Sync in 5 Minutes
 
-Initialize a new template structure: Creates a starter template directory (test/) with example templates, partials, and a values.yml file. Useful for bootstrapping a new setup.
+### 1. Initialize Template Directory
 
 ```bash
-git-pilot init --template-dir test
+git-pilot init --template-dir my-templates
 ```
 
-Run synchronization across configured repositories: Renders templates with variables, compares with the current state in each repository, and shows an interactive preview of changes. Applies updates only after confirmation.
+This creates a sample structure with:
+
+* Example templates (`*.yml.j2`)
+* Partials in `includes/`
+* Helper macros in `_helpers.tpl`
+* A working `values.yml` config
+
+---
+
+### 2. Customize Templates and Values
+
+Edit `my-templates/values.yml`:
+
+```yaml
+defaults:
+  branch: main
+  message: "git-pilot: update workflows"
+  path: ".github/workflows"
+  vars:
+    ci_name: my-pipeline
+    env: dev
+  templates:
+    - ".*\.j2$"
+
+repos:
+  - name: r3d-shadow/git-pilot-test-1
+    vars:
+      job_id: scan1
+  - name: r3d-shadow/git-pilot-test-2
+    branch: main # override
+    vars:
+      job_id: scan2
+      env: prod # override
+```
+
+---
+
+### 3. Run Your First Sync
 
 ```bash
+cd my-templates
+
 git-pilot sync \
-  --token <your-github-token> \
-  --templates test \
-  --values test/values.yml
+  --token $GITHUB_TOKEN \
+  --templates ./ \
+  --values ./values.yml
 ```
 
-### Options:
-
-| Flag          | Description                            |
-| ------------- | -------------------------------------- |
-| `--token`     | GitHub Personal Access Token           |
-| `--templates` | Path to the root template directory    |
-| `--values`    | Path to the config file (`values.yml`) |
+✅ You’ll see a full visual diff. Confirm to sync. That’s it!
 
 ---
 
-## 🧩 Configuration (`values.yml`)
+## 📘 Docs
 
-The configuration file defines global defaults and per-repo overrides for:
-
-* Branch name
-* Commit message
-* Target directory for rendered templates
-* Regex patterns for template selection
-* Variables to inject into templates
-
-See the [Configuration Reference](docs/configuration.md) for a detailed breakdown.
+* [Templating Guide](docs/templating.md) — Includes, macros, helpers, and Jinja2 syntax
+* [Configuration Reference](docs/configuration.md) — All config options and repo overrides
+* [Architecture Guide](docs/architecture-guide.md) — Extending providers and internal design
+* [Contributing to `git-pilot`](docs/contributing.md)
+* [Roadmap](docs/roadmap.md)
 
 ---
 
-## 🧠 Templating
+## 🛠️ Advanced Examples
 
-`git-pilot` supports Helm-style rendering using Jinja2, including:
+* Sync GitHub Actions, README.md, configs, policies, and more
+* Regex-targeted templates per repo
+* Environments like `dev`, `staging`, `prod`
+* Centralized secrets and configurations with overrides
 
-* Custom delimiters to avoid conflicts with GitHub Actions syntax
-* Shared macro files and reusable partial templates
-* Built-in helper functions like `indent`, `to_yaml`, `tpl()`, etc.
-
-See the [Templating Guide](docs/templating.md) for structure and usage examples.
-
----
-
-## 💾 State Management
-
-A local JSON state file tracks:
-
-* Which templates were applied to which repositories and branches
-* SHA of the rendered content to detect changes
-* Obsolete workflows to remove when templates are no longer matched
-
-This ensures safe, idempotent operations and automatic cleanup.
-
----
-
-## 🧪 Interactive Comparison Viewer
-
-Before applying changes, `git-pilot` presents a full summary:
-
-* **Created**: New files to be added
-* **Updated**: Modified files with side-by-side diffs
-* **Deleted**: Stale or obsolete files to be removed
-
-You can visually inspect changes before confirming. Nothing is pushed until confirmed.
+→ See `/example-template-dir` for ready-to-copy setups
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! To get started:
+We welcome contributors! Here's how to get started:
 
-1. Create a virtual environment and install dev dependencies.
-2. Run the test suite and linters.
-3. Implement your feature or fix.
-4. Submit a pull request with a clear description.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+git-pilot
+```
 
-See the [Technical Architecture Guide](docs/architecture-guide) for details.
+Open a PR with a clear description. See the [Architecture Guide](docs/architecture-guide.md) for more details.
 
 ---
+
+## 🚀 Spread the Word
+
+> Just found this tool called `git-pilot` — sync your GitHub Actions, configs, and more across 10+ repos with a single command. Helm-style templates. Pure 🔥.
+
+Tweet it. Star it. Fork it. Contribute.
+
+Let’s build better DevOps pipelines together.
+
+---
+
+## 🪪 License
+
+Apache-2.0 license — [LICENSE](./LICENSE)
+
+

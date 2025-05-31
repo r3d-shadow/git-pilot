@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build, Release and Publish to PyPI
 
 on:
   push:
@@ -10,9 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      packages: write
 
     steps:
       - name: Checkout code
@@ -23,18 +21,24 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install build tool
-        run: pip install build
+      - name: Install build and twine
+        run: |
+          pip install build twine
 
       - name: Build source + wheel
         run: python -m build
 
-      - name: Create GitHub Release and Upload Python Artifacts
+      - name: Create GitHub Release and Upload Artifacts
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            dist/*.whl
-          draft: false
-          prerelease: false
+            dist/*
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m twine upload dist/*

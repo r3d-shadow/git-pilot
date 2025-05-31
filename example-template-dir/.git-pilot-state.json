@@ -1,34 +1,36 @@
 {
   "repos": {
-    "r3d-shadow/git-pilot-test-2": {
-      "branches": {
-        "main": {
-          "files": {
-            "override-example.yml.j2": {
-              "path": ".github/workflows/git-pilot/override-example.yml",
-              "sha": "abc1247b5f842e4d2ceecc3b6c241ed50966203d52689b9a89bde68ce4aa325e",
-              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello10 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-              "updated_at": "2025-05-30T07:23:24Z"
+    "github": {
+      "r3d-shadow/git-pilot-test-2": {
+        "branches": {
+          "main": {
+            "files": {
+              "override-example.yml.j2": {
+                "path": ".github/workflows/git-pilot/override-example.yml",
+                "sha": "1ad4ff46c493cd26bf239fcd92884bd49cbd4535692647931945e9f8ae729c8f",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello19 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-05-31T05:01:39Z"
+              }
             }
           }
         }
-      }
-    },
-    "r3d-shadow/git-pilot-test-1": {
-      "branches": {
-        "dev": {
-          "files": {
-            "example.yml.j2": {
-              "path": ".github/workflows/example.yml",
-              "sha": "61afadc6b00e2152994acf59c0a56b80d147e8c70054801f4afbb9c27977709a",
-              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v3\n\n      - name: Hello World\n        run: echo \"Hello, World from job CONTAINER_SCAN1!\"",
-              "updated_at": "2025-05-29T04:44:52Z"
-            },
-            "override-example.yml.j2": {
-              "path": ".github/workflows/override-example.yml",
-              "sha": "74cafad8fc1d7b6bb3dcd3ad456605900ccd19b63e023532a7fed42b99ac6d7e",
-              "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello10 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-              "updated_at": "2025-05-30T07:23:22Z"
+      },
+      "r3d-shadow/git-pilot-test-1": {
+        "branches": {
+          "dev": {
+            "files": {
+              "example.yml.j2": {
+                "path": ".github/workflows/example.yml",
+                "sha": "61afadc6b00e2152994acf59c0a56b80d147e8c70054801f4afbb9c27977709a",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v3\n\n      - name: Hello World\n        run: echo \"Hello, World from job CONTAINER_SCAN1!\"",
+                "updated_at": "2025-05-29T04:44:52Z"
+              },
+              "override-example.yml.j2": {
+                "path": ".github/workflows/override-example.yml",
+                "sha": "3a1ef8ce5ad65162b81b7e0b43532443100438e540e264d7a379a13b6b99e52a",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello19 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-05-31T05:01:37Z"
+              }
             }
           }
         }
