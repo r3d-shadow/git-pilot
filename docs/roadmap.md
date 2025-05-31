@@ -10,7 +10,7 @@ Enable seamless, automated synchronization of templated CI/CD workflows, configu
 
 ---
 
-## 📅 Near-Term (Next 1–3 months)
+## 📅 Near-Term (Next 0–1 months)
 
 ### Core Enhancements
 
@@ -41,7 +41,7 @@ Enable seamless, automated synchronization of templated CI/CD workflows, configu
 
 ---
 
-## 🔮 Mid-Term (3–6 months)
+## 🔮 Mid-Term (1–2 months)
 
 ### Feature Expansion
 
@@ -59,7 +59,7 @@ Enable seamless, automated synchronization of templated CI/CD workflows, configu
 * [ ] Enhance diff viewer with side-by-side diffs and search/filter capabilities
 ---
 
-## 🌟 Long-Term (6+ months)
+## 🌟 Long-Term (2+ months)
 
 ### Ecosystem Growth
 
