@@ -105,15 +105,17 @@ git-pilot sync \
 
 ✅ You’ll see a full visual diff. Confirm to sync. That’s it!
 
+![Demo GIF](https://github.com/r3d-shadow/git-pilot/blob/main/docs/assets/demo.gif)
+
 ---
 
 ## 📘 Docs
 
-* [Templating Guide](docs/templating.md) — Includes, macros, helpers, and Jinja2 syntax
-* [Configuration Reference](docs/configuration.md) — All config options and repo overrides
-* [Architecture Guide](docs/architecture-guide.md) — Extending providers and internal design
-* [Contributing to `git-pilot`](docs/contributing.md)
-* [Roadmap](docs/roadmap.md)
+* [Templating Guide](https://github.com/r3d-shadow/git-pilot/blob/main/docs/templating.md) — Includes, macros, helpers, and Jinja2 syntax
+* [Configuration Reference](https://github.com/r3d-shadow/git-pilot/blob/main/docs/configuration.md) — All config options and repo overrides
+* [Architecture Guide](https://github.com/r3d-shadow/git-pilot/blob/main/docs/architecture-guide.md) — Extending providers and internal design
+* [Contributing to `git-pilot`](https://github.com/r3d-shadow/git-pilot/blob/main/docs/contributing.md)
+* [Roadmap](https://github.com/r3d-shadow/git-pilot/blob/main/docs/roadmap.md)
 
 ---
 
@@ -141,7 +143,7 @@ pip install -e .
 git-pilot
 ```
 
-Open a PR with a clear description. See the [Architecture Guide](docs/architecture-guide.md) for more details.
+Open a PR with a clear description. See the [Architecture Guide](https://github.com/r3d-shadow/git-pilot/blob/main/docs/architecture-guide.md) for more details.
 
 ---
 
@@ -157,6 +159,6 @@ Let’s build better DevOps pipelines together.
 
 ## 🪪 License
 
-Apache-2.0 license — [LICENSE](./LICENSE)
+Apache-2.0 license — [LICENSE](https://github.com/r3d-shadow/git-pilot/blob/main/LICENSE)
 
 
