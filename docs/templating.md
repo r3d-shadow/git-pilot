@@ -1,48 +1,49 @@
 # 🧠 Templating Guide
 
-`git-pilot` uses a Helm-style templating engine built on Jinja2 to render GitHub Actions workflows. This guide walks through the templating features and best practices.
+`git-pilot` uses a **Helm-style templating engine** built on **Jinja2** to render GitHub Actions workflows (or any text-based config files). This guide covers templating concepts, syntax, helpers, best practices, and an end-to-end example.
 
 ---
 
 ## 🧱 Template Files
 
-Templates are Jinja2 files ending in `.j2`. You can organize templates into logical directories and use shared partials or macros.
+* Templates are **Jinja2** files with a `.j2` suffix.
+* Organize templates logically for maintainability:
 
-* **Templates**: Full files rendered to target repos (e.g. `example.yml.j2`)
-* **Includes**: Reusable chunks included in templates (e.g. `includes/units/*.j2`)
-* **Helpers**: `.tpl` macro files with reusable logic (e.g. `_helpers.tpl`)
+  * **Templates**: Full files rendered as output (e.g. `example.yml.j2`)
+  * **Includes**: Reusable partial snippets (e.g. `includes/units/*.j2`)
+  * **Helpers**: Macro files ending in `.tpl` containing reusable functions/macros (e.g. `_helpers.tpl`)
 
 ---
 
 ## 🔀 Custom Delimiters
 
-To avoid syntax collisions with GitHub Actions YAML files, `git-pilot` uses custom delimiters:
+`git-pilot` uses custom delimiters to avoid conflicts with GitHub Actions YAML syntax:
 
-| Purpose         | Syntax                             |
-| --------------- | ---------------------------------- |
-| Variable        | `[[ variable ]]`                   |
-| Statement/Block | `[% if condition %]...[% endif %]` |
+| Purpose           | Syntax                               |
+| ----------------- | ------------------------------------ |
+| Variables         | `[[ variable_name ]]`                |
+| Statements/Blocks | `[% if condition %] ... [% endif %]` |
+
+> These custom delimiters let you write Jinja2 logic without clashing with `${{ }}` or YAML syntax in workflows.
 
 ---
 
-## ⚙️ Template Functions
+## ⚙️ Built-in Template Functions & Helpers
 
-You can use any Jinja2 feature along with these custom helpers available globally:
+You can use any Jinja2 feature plus these global helpers:
 
-| Function        | Description                                |
-| --------------- | ------------------------------------------ |
-| `tpl(str)`      | Evaluates a string as a Jinja2 template    |
-| `to_yaml(obj)`  | Converts an object to indented YAML        |
-| `indent(n, s)`  | Indents string `s` with `n` spaces         |
-| `capitalize(s)` | Capitalizes the first letter of string `s` |
+| Function        | Description                                          |
+| --------------- | ---------------------------------------------------- |
+| `indent(n, s)`  | Indent multiline string `s` by `n` spaces            |
+| `capitalize(s)` | Capitalize first letter of string `s`                |
 
 ---
 
 ## 📥 Includes and Macros
 
-You can break templates into reusable includes and macros for composability.
+Modularize templates by breaking them into smaller parts.
 
-### Example Include:
+### Example Include File
 
 ```jinja
 # templates/includes/units/hello-world.j2
@@ -50,36 +51,37 @@ name: hello-world
 run: echo "Hello [[ name ]]!"
 ```
 
-### Usage in Template:
+### Include Usage
 
 ```jinja
 [% include "includes/units/hello-world.j2" %]
 ```
 
+This renders the included snippet inline, allowing reuse and cleaner templates.
+
 ---
 
 ## 📌 Best Practices
 
-* Use `.tpl` for helper macros and import them globally
-* Group includes under `includes/` for clarity
-* Use descriptive file names and consistent patterns
-* Avoid hardcoding variables—prefer `[[ some_var ]]` with fallbacks
+* Store macros/helpers in `.tpl` files and import globally.
+* Place reusable snippets under `includes/` for organization.
+* Use clear, descriptive filenames and consistent naming.
+* Avoid hardcoding variables; prefer injecting values with `[[ var_name ]]`.
+* Use fallbacks and conditionals in templates to handle missing or optional variables.
 
 ---
 
-## 📦 Example
+## 📦 Full Example Walkthrough
 
-This example shows how templates, includes, macros, and `values.yml` work together.
-
-### 1. Initialize a Template Directory
+### Step 1: Initialize Template Directory
 
 ```bash
 git-pilot init --template-dir test1
 ```
 
-### 2. Template and Config Files
+### Step 2: Template and Supporting Files
 
-#### 📄 `./example.yml.j2`
+#### `example.yml.j2` — Main Template
 
 ```jinja
 name: [[ ci_name ]]
@@ -99,9 +101,10 @@ jobs:
       [[ include('units/hello-world.j2') | indent(6) ]]
 ```
 
-This is your main template, where dynamic variables like `ci_name`, `env`, and `job_id` are rendered. It also includes a reusable job step using `include()`.
+* Uses injected variables like `ci_name`, `env`, and `job_id`.
+* Includes reusable steps via the include directive.
 
-#### 📄 `./includes/_helpers.tpl`
+#### `includes/_helpers.tpl` — Macro Helper
 
 ```jinja
 [%- macro upper(s) -%]
@@ -109,18 +112,18 @@ This is your main template, where dynamic variables like `ci_name`, `env`, and `
 [%- endmacro -%]
 ```
 
-This macro is globally accessible and can be used for transformations like making strings uppercase.
+Defines a global macro `upper()` for uppercase string transformation.
 
-#### 📄 `./includes/units/hello-world.j2`
+#### `includes/units/hello-world.j2` — Included Snippet
 
 ```yaml
 - name: Hello World
   run: echo "Hello, World from job [[ _.upper(job_id) ]]!"
 ```
 
-This reusable unit prints a message with the job ID in uppercase, using the helper macro.
+Prints a message using the uppercase macro on `job_id`.
 
-#### 📄 `./override-example.yml.j2`
+#### `override-example.yml.j2` — Alternate Template
 
 ```jinja
 name: [[ ci_name ]]
@@ -140,9 +143,9 @@ jobs:
           SUPER_SECRET: ${{ secrets.SuperSecret }}
 ```
 
-This is an alternate template to be applied only to selected repos using regex-based matching.
+An alternate workflow template that can be selectively applied via regex matching.
 
-#### 📄 `./values.yml`
+#### `values.yml` — Configuration File
 
 ```yaml
 defaults:
@@ -171,19 +174,25 @@ repos:
       - "^override.*\\.j2$"
 ```
 
-Defines default behaviors and overrides per repository. The `templates` field supports regex to control which templates apply to which repos.
+Defines defaults and per-repo overrides including branch, commit message, output path, variables, and template selection via regex.
 
 ---
 
-### 3. Run Git Sync
+### Step 3: Render and Sync Templates
+
+Run:
 
 ```bash
 cd test1
 
 git-pilot sync \
-  --token <GITHU_TOKEN> \
+  --token <GITHUB_TOKEN> \
   --template-dir ./ \
   --values ./values.yml
 ```
 
-This will render templates using the provided values, preview a comparison view of all changes, and summarize created, updated, and deleted files before committing anything.
+* Renders templates with injected variables.
+* Shows a preview diff and summary of created/updated/deleted files.
+* Commits and pushes changes to each target repository.
+
+---
