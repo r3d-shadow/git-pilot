@@ -9,7 +9,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="git-pilot",
-    version="0.1.6",
+    version="0.2.0",
     description="A CLI tool to sync and update Git workflows and configurations across multiple repositories efficiently and consistently.",
     long_description=long_description,
     long_description_content_type="text/markdown",
