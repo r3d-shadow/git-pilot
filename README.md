@@ -115,6 +115,8 @@ git-pilot sync \
 * [Templating Guide](docs/templating.md) — Includes, macros, helpers, and Jinja2 syntax
 * [Configuration Reference](docs/configuration.md) — All config options and repo overrides
 * [Architecture Guide](docs/architecture-guide.md) — Extending providers and internal design
+* [Contributing to `git-pilot`](docs/contributing.md)
+* [Roadmap](docs/roadmap.md)
 
 ---
 
