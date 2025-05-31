@@ -12,13 +12,15 @@ class SyncEngine:
         state_mgr: StateInterface,
         template_eng: TemplateInterface,
         diff_viewer: DiffViewerInterface,
-        interactive: bool = True  
+        interactive: bool = True,
+        provider_name: str = None
     ):
         self.provider = provider
         self.state_mgr = state_mgr
         self.template_eng = template_eng
         self.diff_viewer = diff_viewer
         self.interactive = interactive  
+        self.provider_name = provider_name  
 
     def sync(self, config: Any) -> None:
         all_diffs = []
@@ -50,7 +52,7 @@ class SyncEngine:
                 key = tmpl
                 current_sha = compute_sha(content)
 
-                existing_entry = self.state_mgr.get_file_entry(repo_cfg.name, branch, key)
+                existing_entry = self.state_mgr.get_file_entry(repo_cfg.name, branch, key, self.provider_name)
                 previous_sha = existing_entry.get("sha")
                 previous_content = existing_entry.get("rendered")
 
@@ -115,14 +117,15 @@ class SyncEngine:
                         key=item["key"],
                         file_path=item["path"],
                         sha=item["sha"],
-                        rendered=item["content"]
+                        rendered=item["content"],
+                        provider_name=self.provider_name,
                     )
 
         self.state_mgr.save()
         Logger.get_logger().info("Sync complete.")
 
     def _handle_old_files(self, repo_cfg, synced_keys, all_diffs, plan, config):
-        old_files = self.state_mgr.cleanup_old(repo_cfg.name, repo_cfg.branch, synced_keys)
+        old_files = self.state_mgr.cleanup_old(repo_cfg.name, repo_cfg.branch, synced_keys, self.provider_name)
         for p in old_files:
             all_diffs.append((repo_cfg.name, repo_cfg.branch, 'delete', p, None, None))
             plan.append(dict(
@@ -136,7 +139,7 @@ class SyncEngine:
             ))
 
         active_branches = {r.branch for r in config.repos if r.name == repo_cfg.name}
-        old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches)
+        old_branch_files = self.state_mgr.cleanup_old_branches(repo_cfg.name, active_branches, self.provider_name)
         for branch_name, path in old_branch_files:
             all_diffs.append((repo_cfg.name, branch_name, 'delete', path, None, None))
             plan.append(dict(

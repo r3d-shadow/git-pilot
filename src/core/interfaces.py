@@ -40,30 +40,30 @@ class StateInterface(ABC):
         pass
 
     @abstractmethod
-    def cleanup_old(self, repo: str, branch: str, current_keys: List[str]) -> List[str]:
+    def cleanup_old(self, repo: str, branch: str, current_keys: List[str], provider_name: str) -> List[str]:
         """
-        Remove state entries not in `current_keys` for the given repo and branch.
+        Remove state entries not in `current_keys` for the given repo and branch under a specific provider.
         Returns list of file paths that should be deleted remotely.
         """
         pass
 
     @abstractmethod
-    def cleanup_old_branches(self, repo: str, active_branches: Set[str]) -> List[Tuple[str, str]]:
+    def cleanup_old_branches(self, repo: str, active_branches: Set[str], provider_name: str) -> List[Tuple[str, str]]:
         """
-        Remove entries from branches that are no longer active.
+        Remove entries from branches that are no longer active under a specific provider.
         Returns list of (branch, file_path) tuples that should be deleted remotely.
         """
         pass
 
     @abstractmethod
-    def update_file_entry(self, repo: str, branch: str, key: str, file_path: str, sha: str, rendered: str) -> None:
+    def update_file_entry(self, repo: str, branch: str, key: str, file_path: str, sha: str, rendered: str, provider_name: str) -> None:
         """
         Update state entry with file metadata.
         """
         pass
 
     @abstractmethod
-    def get_file_entry(self, repo: str, branch: str, key: str) -> dict:
+    def get_file_entry(self, repo: str, branch: str, key: str, provider_name: str) -> dict:
         """
         Retrieve state metadata for a specific file entry.
         """

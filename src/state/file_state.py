@@ -22,15 +22,15 @@ class FileStateManager(StateInterface):
             json.dump(self.state, f, indent=2)
         os.replace(tmp, self.path)
 
-    def _get_branch_files(self, repo: str, branch: str) -> dict:
-        return self.state.get("repos", {}).get(repo, {}).get("branches", {}).get(branch, {}).get("files", {})
+    def _get_branch_files(self, repo: str, branch: str, provider_name: str) -> dict:
+        return self.state.get("repos", {}).get(provider_name, {}).get(repo, {}).get("branches", {}).get(branch, {}).get("files", {})
 
-    def get_file_entry(self, repo: str, branch: str, key: str) -> dict:
-        return self._get_branch_files(repo, branch).get(key, {})
+    def get_file_entry(self, repo: str, branch: str, key: str, provider_name: str) -> dict:
+        return self._get_branch_files(repo, branch, provider_name).get(key, {})
 
-    def cleanup_old(self, repo: str, branch: str, current_keys: List[str]) -> List[str]:
+    def cleanup_old(self, repo: str, branch: str, current_keys: List[str], provider_name: str) -> List[str]:
         removed_files = []
-        branch_files = self._get_branch_files(repo, branch)
+        branch_files = self._get_branch_files(repo, branch, provider_name)
         if not branch_files:
             return removed_files
 
@@ -45,17 +45,22 @@ class FileStateManager(StateInterface):
             del branch_files[key]
 
         # Clean up empty structures
+        provider_repos = self.state["repos"].get(provider_name, {})
+        repo_entry = provider_repos.get(repo, {})
+        branches = repo_entry.get("branches", {})
+
         if not branch_files:
-            branches = self.state["repos"].get(repo, {}).get("branches", {})
             branches.pop(branch, None)
             if not branches:
-                self.state["repos"].pop(repo, None)
+                provider_repos.pop(repo, None)
+                if not provider_repos:
+                    self.state["repos"].pop(provider_name, None)
 
         return removed_files
 
-    def cleanup_old_branches(self, repo: str, active_branches: Set[str]) -> List[Tuple[str, str]]:
+    def cleanup_old_branches(self, repo: str, active_branches: Set[str], provider_name: str) -> List[Tuple[str, str]]:
         removed_files = []
-        repo_branches = self.state.get("repos", {}).get(repo, {}).get("branches", {})
+        repo_branches = self.state.get("repos", {}).get(provider_name, {}).get(repo, {}).get("branches", {})
         if not repo_branches:
             return removed_files
 
@@ -69,13 +74,17 @@ class FileStateManager(StateInterface):
                     removed_files.append((branch, path))
             repo_branches.pop(branch, None)
 
+        provider_repos = self.state["repos"].get(provider_name, {})
         if not repo_branches:
-            self.state["repos"].pop(repo, None)
+            provider_repos.pop(repo, None)
+            if not provider_repos:
+                self.state["repos"].pop(provider_name, None)
 
         return removed_files
 
-    def update_file_entry(self, repo: str, branch: str, key: str, file_path: str, sha: str, rendered: str) -> None:
+    def update_file_entry(self, repo: str, branch: str, key: str, file_path: str, sha: str, rendered: str, provider_name: str) -> None:
         self.state.setdefault("repos", {}) \
+            .setdefault(provider_name, {}) \
             .setdefault(repo, {}) \
             .setdefault("branches", {}) \
             .setdefault(branch, {}) \
