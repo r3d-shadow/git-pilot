@@ -132,7 +132,9 @@ git-pilot sync \
 
 We welcome contributors! Here's how to get started:
 
-```bash
+```
+git clone https://github.com/r3d-shadow/git-pilot.git
+cd git-pilot
 python3 -m venv venv
 source venv/bin/activate
 pip install -e .

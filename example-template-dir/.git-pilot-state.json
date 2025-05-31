@@ -7,9 +7,9 @@
             "files": {
               "override-example.yml.j2": {
                 "path": ".github/workflows/git-pilot/override-example.yml",
-                "sha": "1ad4ff46c493cd26bf239fcd92884bd49cbd4535692647931945e9f8ae729c8f",
-                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello19 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-                "updated_at": "2025-05-31T05:01:39Z"
+                "sha": "b3424537490cc481c6ce6dea325b1021a4f5b2a0ce387e0f3c63ad23975af1d3",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello20 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-05-31T06:37:42Z"
               }
             }
           }
@@ -27,9 +27,9 @@
               },
               "override-example.yml.j2": {
                 "path": ".github/workflows/override-example.yml",
-                "sha": "3a1ef8ce5ad65162b81b7e0b43532443100438e540e264d7a379a13b6b99e52a",
-                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello19 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-                "updated_at": "2025-05-31T05:01:37Z"
+                "sha": "cb1605c04e6aa33b0dded91070f9202f970db5d0782a6bd4f26db6517aac77e8",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello20 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-05-31T06:37:39Z"
               }
             }
           }
