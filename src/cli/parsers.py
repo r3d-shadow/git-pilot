@@ -1,9 +1,9 @@
+from src.cli.commands import InitCommand, SyncCommand, DriftDetectCommand
 import argparse
-from src.cli.commands import InitCommand, SyncCommand
 
 class ParserBuilder:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(description="git-piplot: sync reusable files across repos")
+        self.parser = argparse.ArgumentParser(description="git-pilot: sync reusable files across repos")
         self.subparsers = self.parser.add_subparsers(dest='command_name', required=True)
 
     def with_init_command(self):
@@ -19,12 +19,24 @@ class ParserBuilder:
         sync_parser.add_argument('--template-dir', required=True)
         sync_parser.add_argument('--values', required=True)
         sync_parser.add_argument('--state-file', default='.git-pilot-state.json')
-        sync_parser.add_argument(
-            "--non-interactive",
-            action="store_true",
-            help="Run sync in non-interactive mode (auto-approve all changes)"
-        )
+        sync_parser.add_argument("--non-interactive", action="store_true", help="Run sync in non-interactive mode (auto-approve all changes)")
         sync_parser.set_defaults(command=SyncCommand())
+        return self
+
+    def with_drift_detect_command(self):
+        drift_parser = self.subparsers.add_parser(
+            'drift-detect',
+            help='Detect and optionally reconcile drift from the state file'
+        )
+        drift_parser.add_argument('--provider', choices=['github'], default='github')
+        drift_parser.add_argument('--token', required=True)
+        drift_parser.add_argument('--state-file', default='.git-pilot-state.json')
+        drift_parser.add_argument(
+            '--reconcile',
+            action='store_true',
+            help='Apply changes to reconcile drift (default is detect-only)'
+        )
+        drift_parser.set_defaults(command=DriftDetectCommand())
         return self
 
     def build(self):

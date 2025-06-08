@@ -74,3 +74,23 @@ class RichDiffViewer(DiffViewerInterface):
                 elif key == "\r":  # enter
                     if bool((file_diffs[selected][4] or "").strip()) or bool((file_diffs[selected][5] or "").strip()):
                         show_flags[selected] = not show_flags[selected]
+
+
+    def display_diffs(self, file_diffs):
+        """
+        Non-interactive: Show all diffs in expanded form with no prompt.
+        """
+        table = Table.grid(expand=True)
+        table.add_column()
+        table.add_column()
+        table.add_column()
+
+        header = "[bold cyan]Drift Detected[/bold cyan]\n"
+        table.add_row("", header, "")
+
+        for repo, branch, op, path, old, new in file_diffs:
+            table.add_row("👉", f"{repo} ({branch})/{path} [{op.upper()}]", "")
+            diff_panel = DiffGenerator.generate(old, new, path)
+            table.add_row("", diff_panel, "")
+
+        self.console.print(Panel(table, border_style="bright_blue"))

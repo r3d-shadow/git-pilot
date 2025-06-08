@@ -1,5 +1,5 @@
 from src.config.loader import ConfigLoader
-from src.core.farcade import SyncFacade
+from src.core.farcade import DriftFacade, SyncFacade
 from src.core.init import write_example_structure
 from src.utils.logger import Logger
 
@@ -22,3 +22,13 @@ class SyncCommand(Command):
             state_file=args.state_file
         )
         facade.sync(config, interactive=not getattr(args, "non_interactive", False))
+
+class DriftDetectCommand(Command):
+    def execute(self, args):
+        from src.config.loader import ConfigLoader
+        facade = DriftFacade(
+            provider_name=args.provider,
+            token=args.token,
+            state_file=args.state_file
+        )
+        facade.detect_drift(reconcile=args.reconcile)

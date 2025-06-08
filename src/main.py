@@ -12,6 +12,13 @@ def main():
     console.print(header.append(subheader))
     console.print("\n" * 1) 
 
-    parser = ParserBuilder().with_init_command().with_sync_command().build()
+    parser = (
+        ParserBuilder()
+        .with_init_command()
+        .with_sync_command()
+        .with_drift_detect_command() 
+        .build()
+    )
+
     args = parser.parse_args()
     args.command.execute(args)
