@@ -110,13 +110,14 @@ class SyncEngine:
                     f"{item['repo']} ({item['branch']})/{item['path']} [{item['op']}]"
                 )
 
+                content_sha = compute_sha(item["content"])
                 if item["key"]:
                     self.state_mgr.update_file_entry(
                         repo=item["repo"],
                         branch=item["branch"],
                         key=item["key"],
                         file_path=item["path"],
-                        sha=item["sha"],
+                        sha=content_sha,
                         rendered=item["content"],
                         provider_name=self.provider_name,
                     )

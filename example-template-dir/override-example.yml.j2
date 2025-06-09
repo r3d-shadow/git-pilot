@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Hello from [[ env ]]!
-        run: echo "Hello22 [[ job_id ]]!"
+        run: echo "Hello [[ job_id ]]! 1"
         env:
           SUPER_SECRET: ${{ secrets.SuperSecret }}

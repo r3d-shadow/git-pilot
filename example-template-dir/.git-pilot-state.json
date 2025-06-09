@@ -7,9 +7,9 @@
             "files": {
               "override-example.yml.j2": {
                 "path": ".github/workflows/git-pilot/override-example.yml",
-                "sha": "d83283e3327ac41b8f136aa0ff7d086f6ea1846e",
-                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello22 sast!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-                "updated_at": "2025-06-08T05:35:04Z"
+                "sha": "c87a477d4a368e169002a73a9ffb9fafd27b69cab48cc93226f398188c278b75",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"stage\"\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from stage!\n        run: echo \"Hello sast! 1\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-06-09T02:53:44Z"
               }
             }
           }
@@ -27,9 +27,9 @@
               },
               "override-example.yml.j2": {
                 "path": ".github/workflows/override-example.yml",
-                "sha": "43addb06cc949e01a72a93f37249727ceb9b67de",
-                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello22 container_scan1!\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
-                "updated_at": "2025-06-08T05:35:07Z"
+                "sha": "0d45e896dd2efc641dd98fa8a1dd472436d0aea747f6302b13b550b07da44315",
+                "rendered": "name: scan\n\non:\n  push:\n    branches:\n      - \"test\"\n\njobs:\n  container_scan1:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Hello from test!\n        run: echo \"Hello container_scan1! 1\"\n        env:\n          SUPER_SECRET: ${{ secrets.SuperSecret }}",
+                "updated_at": "2025-06-09T02:50:58Z"
               }
             }
           }

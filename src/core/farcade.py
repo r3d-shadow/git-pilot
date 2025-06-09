@@ -86,12 +86,13 @@ class DriftFacade:
 
             key = os.path.basename(path) + ".j2"
 
+            content_sha = compute_sha(expected_content)
             self.state.update_file_entry(
                 repo=repo,
                 branch=branch,
                 key=key,
                 file_path=path,
-                sha=sha,
+                sha=content_sha,
                 rendered=expected_content,
                 provider_name=self.provider_name
             )
